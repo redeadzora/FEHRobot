@@ -16,13 +16,13 @@
 //The number of counts when 1 degree is turned
 #define COUNTS_PER_DEGREE 233/90
 //The point South of the starting zone
-#define POINT_A 23
+#define POINT_A 18
 //The point East of POINT_A
-#define POINT_B 17
+#define POINT_B 31.3
 //The point North of POINT_B
-#define POINT_C 10
+#define POINT_C 57.3
 //The point West of POINT_C
-#define POINT_D 43
+#define POINT_D 64
 //The standard driving percentage
 #define STD_DRIVE 25
 //The fast driving percentage
@@ -59,12 +59,14 @@ void checkXMinus(float x_coordinate);
 void checkYPlus(float y_coordinate);
 void checkYMinus(float y_coordinate);
 void checkHeading(float heading);
-void buttonsOrder();
 
 int main(void)
 {
     LCD.Clear( FEHLCD::White );
     LCD.SetFontColor( FEHLCD::Black );
+    //Set servo limits
+    disk.SetMin(510);
+    disk.SetMax(2280);
     RPS.InitializeMenu();
     while(true) {
         LCD.WriteLine("Press the middle button to begin");
@@ -85,16 +87,14 @@ int main(void)
         turnLeft(STD_DRIVE, 90, 0);
         checkHeading(180);
         Sleep(SLEEP_TIME);
-        driveForward(FAST_DRIVE, 30, 0);
+        driveForward(FAST_DRIVE, 38, 0);
         checkYPlus(POINT_C);
         Sleep(SLEEP_TIME);
-        turnLeft(STD_DRIVE, 90, 0);
-        checkHeading(270);
+        turnLeft(STD_DRIVE, 45, 0);
+        checkHeading(225);
         Sleep(SLEEP_TIME);
         driveForward(STD_DRIVE, 20, 0);
-        checkXMinus(POINT_D);
-        Sleep(SLEEP_TIME);
-        buttonsOrder();
+        checkYPlus(POINT_D);
     }
     /*while(true) {
         LCD.WriteLine(CDS.Value());
@@ -122,7 +122,7 @@ void turnRight(int percent, int degrees, int input_counts) //using encoders
 }
 
 void turnLeft(int percent, int degrees, int input_counts) //using encoders
-{   
+{
     //Make input degrees and convert degrees to counts
     counts = degrees*COUNTS_PER_DEGREE + input_counts;
     //Reset encoder counts
