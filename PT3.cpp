@@ -29,10 +29,12 @@
 #define FAST_DRIVE 50
 //The slow driving percentage
 #define SLOW_DRIVE 12
-//The max driving speed. Only for use in extreme circumstances
-#define HYPER_DRIVE 100
+//The max driving speed. Only for use in extreme circumstances.
+#define HYPER_DRIVE 100 //Think before you do this.
 //The standard sleep time
 #define SLEEP_TIME 500
+//The short sleep time used in RPS checks
+#define SHORT_SLEEP 50
 //The CdS Threshold
 #define CDS_THRESHOLD .6
 //The angle to press the red button
@@ -41,6 +43,10 @@
 #define BLUE_ANGLE 90
 //The angle to press the white button
 #define WHITE_ANGLE 90
+//Servo motor minimum
+#define SERVO_MIN 510
+//Servo motor maximum
+#define SERVO_MAX 2280
 //Declare the various sensors and motors
 ButtonBoard buttons(FEHIO::Bank3); //Button Board
 FEHServo disk( FEHServo::Servo0); //Disk Mechanism
@@ -52,7 +58,7 @@ AnalogInputPin CdS( FEHIO::P1_0); //CdS cell
 //DigitalInputPin right_bump( FEHIO::P1_2); //Right bump switch (if used)
 //Prototypes for each function
 void turnRight(int percent, int degrees, int input_counts);
-void turnLeft(int percent, int degrees int input_counts);
+void turnLeft(int percent, int degrees, int input_counts);
 void driveForward(int percent, int inches, int input_counts);
 void checkXPlus(float x_coordinate);
 void checkXMinus(float x_coordinate);
@@ -65,15 +71,16 @@ int main(void)
     LCD.Clear( FEHLCD::White );
     LCD.SetFontColor( FEHLCD::Black );
     //Set servo limits
-    disk.SetMin(510);
-    disk.SetMax(2280);
+    disk.SetMin(SERVO_MIN);
+    disk.SetMax(SERVO_MAX);
+    disk.SetDegree(180);
     RPS.InitializeMenu();
     while(true) {
         LCD.WriteLine("Press the middle button to begin");
         while(!buttons.MiddlePressed());
         while(buttons.MiddlePressed());
-        LCD.WriteLine("Will start on light now");
-        while(CdS.Value()>CDS_THRESHOLD);
+        //LCD.WriteLine("Will start on light now");
+        //while(CdS.Value()>CDS_THRESHOLD);
         LCD.Clear( FEHLCD::White );
         driveForward(STD_DRIVE, 13, 0);
         checkYMinus(POINT_A);
@@ -90,8 +97,8 @@ int main(void)
         driveForward(FAST_DRIVE, 38, 0);
         checkYPlus(POINT_C);
         Sleep(SLEEP_TIME);
-        turnLeft(STD_DRIVE, 45, 0);
-        checkHeading(225);
+        turnLeft(STD_DRIVE, 60, 0);
+        checkHeading(240);
         Sleep(SLEEP_TIME);
         driveForward(STD_DRIVE, 20, 0);
         checkYPlus(POINT_D);
@@ -105,7 +112,7 @@ int main(void)
 void turnRight(int percent, int degrees, int input_counts) //using encoders
 {
     //Make input degrees and convert degrees to counts
-    counts = degrees*COUNTS_PER_DEGREE + input_counts;
+    int counts = degrees*COUNTS_PER_DEGREE + input_counts;
     //Reset encoder counts
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
@@ -124,7 +131,7 @@ void turnRight(int percent, int degrees, int input_counts) //using encoders
 void turnLeft(int percent, int degrees, int input_counts) //using encoders
 {
     //Make input degrees and convert degrees to counts
-    counts = degrees*COUNTS_PER_DEGREE + input_counts;
+    int counts = degrees*COUNTS_PER_DEGREE + input_counts;
     //Reset encoder counts
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
@@ -156,15 +163,15 @@ void checkXPlus(float x_coordinate) //using RPS while robot is in the +x directi
         if(RPS.X() > x_coordinate)
         {
             //pulse the motors for a short duration in the correct direction
-            move_forward(-25, 2);
+            driveForward(-STD_DRIVE, 0, 2);
 
         }
         else if(RPS.X() < x_coordinate)
         {
             //pulse the motors for a short duration in the correct direction
-            move_forward(25, 2);
+            driveForward(STD_DRIVE, 0, 2);
         }
-        Sleep(.05);
+        Sleep(SHORT_SLEEP);
     }
 }
 
@@ -176,15 +183,15 @@ void checkXMinus(float x_coordinate) //using RPS while robot is in the -x direct
         if(RPS.X() > x_coordinate)
         {
             //pulse the motors for a short duration in the correct direction
-            move_forward(25, 2);
+            driveForward(STD_DRIVE, 0, 2);
 
         }
         else if(RPS.X() < x_coordinate)
         {
             //pulse the motors for a short duration in the correct direction
-            move_forward(-25, 2);
+            driveForward(-STD_DRIVE, 0, 2);
         }
-        Sleep(.05);
+        Sleep(SHORT_SLEEP);
     }
 }
 
@@ -197,15 +204,15 @@ void checkYMinus(float y_coordinate) //using RPS while robot is in the -y direct
         {
             //pulse the motors for a short duration in the correct direction
 
-            move_forward(25, 2);
+            driveForward(STD_DRIVE, 0, 2);
         }
         else if(RPS.Y() < y_coordinate)
         {
             //pulse the motors for a short duration in the correct direction
 
-            move_forward(-25, 2);
+            driveForward(-STD_DRIVE, 0, 2);
         }
-        Sleep(.05);
+        Sleep(SHORT_SLEEP);
     }
 }
 
@@ -218,15 +225,15 @@ void checkYPlus(float y_coordinate) //using RPS while robot is in the +y directi
         {
             //pulse the motors for a short duration in the correct direction
 
-            move_forward(-25, 2);
+            driveForward(-STD_DRIVE, 0, 2);
         }
         else if(RPS.Y() < y_coordinate)
         {
             //pulse the motors for a short duration in the correct direction
 
-            move_forward(25, 2);
+            driveForward(STD_DRIVE, 0, 2);
         }
-        Sleep(.05);
+        Sleep(SHORT_SLEEP);
     }
 }
 
@@ -239,15 +246,15 @@ void checkHeading(float heading) //using RPS
         {
             //pulse the motors for a short duration in the correct direction
 
-            turn_right(25, 1);
+            turnRight(STD_DRIVE, 0, 1);
         }
         else if(RPS.Y() < heading)
         {
             //pulse the motors for a short duration in the correct direction
 
-            turn_left(25, 1);
+            turnLeft(STD_DRIVE, 0, 1);
         }
-        Sleep(.05);
+        Sleep(SHORT_SLEEP);
     }
 }
 
