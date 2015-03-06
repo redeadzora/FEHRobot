@@ -20,9 +20,9 @@
 //The point East of POINT_A
 #define POINT_B 31.3
 //The point North of POINT_B
-#define POINT_C 57.3
+#define POINT_C 52.1
 //The point West of POINT_C
-#define POINT_D 64
+#define POINT_D 63.7
 //The standard driving percentage
 #define STD_DRIVE 25
 //The fast driving percentage
@@ -65,6 +65,7 @@ void checkXMinus(float x_coordinate);
 void checkYPlus(float y_coordinate);
 void checkYMinus(float y_coordinate);
 void checkHeading(float heading);
+void buttonsOrder();
 
 int main(void)
 {
@@ -73,7 +74,7 @@ int main(void)
     //Set servo limits
     disk.SetMin(SERVO_MIN);
     disk.SetMax(SERVO_MAX);
-    disk.SetDegree(180);
+    disk.SetDegree(0);
     RPS.InitializeMenu();
     while(true) {
         LCD.WriteLine("Press the middle button to begin");
@@ -94,14 +95,39 @@ int main(void)
         turnLeft(STD_DRIVE, 90, 0);
         checkHeading(180);
         Sleep(SLEEP_TIME);
-        driveForward(FAST_DRIVE, 38, 0);
+        driveForward(FAST_DRIVE, 33, 0);
+        driveForward(STD_DRIVE, 1, 0);
+        driveForward(SLOW_DRIVE, 1, 0);
         checkYPlus(POINT_C);
         Sleep(SLEEP_TIME);
-        turnLeft(STD_DRIVE, 60, 0);
-        checkHeading(240);
+        turnLeft(STD_DRIVE, 56, 0);
+        checkHeading(236);
         Sleep(SLEEP_TIME);
         driveForward(STD_DRIVE, 20, 0);
         checkYPlus(POINT_D);
+        turnRight(STD_DRIVE, 15, 0);
+        checkHeading(221.5);
+        //buttonsOrder();
+        //RAM THAT MOFO
+        right_motor.SetPercent(-FAST_DRIVE);
+        left_motor.SetPercent(FAST_DRIVE);
+        Sleep(2.0);
+        driveForward(-STD_DRIVE, 1, 0);
+        Sleep(1.0);
+        right_motor.SetPercent(-FAST_DRIVE);
+        left_motor.SetPercent(FAST_DRIVE);
+        Sleep(2.0);
+        driveForward(-STD_DRIVE, 1, 0);
+        right_motor.SetPercent(-FAST_DRIVE);
+        left_motor.SetPercent(FAST_DRIVE);
+        Sleep(2.0);
+        driveForward(-STD_DRIVE, 1, 0);
+        Sleep(1.0);
+        right_motor.SetPercent(-FAST_DRIVE);
+        left_motor.SetPercent(FAST_DRIVE);
+        Sleep(2.0);
+        driveForward(-STD_DRIVE, 1, 0);
+        Sleep(1.0);
     }
     /*while(true) {
         LCD.WriteLine(CDS.Value());
@@ -267,108 +293,108 @@ void buttonsOrder()
         if (blue == 2) {
             //Press red
             disk.SetDegree(RED_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
             //Press blue
             disk.SetDegree(BLUE_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
             //Press white
             disk.SetDegree(WHITE_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
         }
         else {
             //Press red
             disk.SetDegree(RED_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
             //Press white
             disk.SetDegree(WHITE_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
             //Press blue
             disk.SetDegree(BLUE_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
         }
     }
     else if (blue == 1) {
         if (red == 2) {
             //Press blue
             disk.SetDegree(BLUE_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
             //Press red
             disk.SetDegree(RED_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
             //Press white
             disk.SetDegree(WHITE_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
         }
         else {
             //Press blue
             disk.SetDegree(BLUE_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
             //Press white
             disk.SetDegree(WHITE_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
             //Press red
             disk.SetDegree(RED_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
         }
     }
     else {
         if (blue == 2) {
             //Press white
             disk.SetDegree(WHITE_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
             //Press blue
             disk.SetDegree(BLUE_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
             //Press red
             disk.SetDegree(RED_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
         }
         else {
             //Press white
             disk.SetDegree(WHITE_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
             //Press red
             disk.SetDegree(RED_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
             //Press blue
             disk.SetDegree(BLUE_ANGLE);
-            driveForward(SLOW_DRIVE, 1, 0);
+            driveForward(SLOW_DRIVE, 2, 0);
             Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 1, 0);
+            driveForward(-SLOW_DRIVE, 2, 0);
         }
     }
 }
