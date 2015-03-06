@@ -74,7 +74,7 @@ int main(void)
     //Set servo limits
     disk.SetMin(SERVO_MIN);
     disk.SetMax(SERVO_MAX);
-    disk.SetDegree(0);
+    disk.SetDegree(20);
     RPS.InitializeMenu();
     while(true) {
         LCD.WriteLine("Press the middle button to begin");
@@ -82,21 +82,21 @@ int main(void)
         while(buttons.MiddlePressed());
         //LCD.WriteLine("Will start on light now");
         //while(CdS.Value()>CDS_THRESHOLD);
-        LCD.Clear( FEHLCD::White );
-        driveForward(STD_DRIVE, 13, 0);
-        checkYMinus(POINT_A);
+        //LCD.Clear( FEHLCD::White );
+       // driveForward(STD_DRIVE, 13, 0);
+        //checkYMinus(POINT_A);
+        //Sleep(SLEEP_TIME);
+        //turnLeft(STD_DRIVE, 90, 0);
+        //checkHeading(90);
+        //Sleep(SLEEP_TIME);
+        //driveForward(STD_DRIVE, 11, -50);
+        //checkXPlus(POINT_B);
+        //Sleep(SLEEP_TIME);
+       //turnLeft(STD_DRIVE, 90, 0);
+        //checkHeading(180);
         Sleep(SLEEP_TIME);
-        turnLeft(STD_DRIVE, 90, 0);
-        checkHeading(90);
-        Sleep(SLEEP_TIME);
-        driveForward(STD_DRIVE, 11, 0);
-        checkXPlus(POINT_B);
-        Sleep(SLEEP_TIME);
-        turnLeft(STD_DRIVE, 90, 0);
-        checkHeading(180);
-        Sleep(SLEEP_TIME);
-        driveForward(FAST_DRIVE, 33, 0);
-        driveForward(STD_DRIVE, 1, 0);
+        driveForward(FAST_DRIVE, 35, 0);
+        driveForward(STD_DRIVE, 2, 0);
         driveForward(SLOW_DRIVE, 1, 0);
         checkYPlus(POINT_C);
         Sleep(SLEEP_TIME);
