@@ -78,12 +78,15 @@ int main(void)
     //Set servo limits
     disk.SetMin(SERVO_MIN);
     disk.SetMax(SERVO_MAX);
-    disk.SetDegree(20);
-    RPS.InitializeMenu();
-    //while(true) {
-    //    LCD.WriteLine("Press the middle button to begin");
-    //    while(!buttons.MiddlePressed());
-    //    while(buttons.MiddlePressed());
+    disk.SetDegree(10);
+    //RPS.InitializeMenu();
+    //LCD.WriteLine("Press the middle button to begin");
+    LCD.WriteLine("Left: Fast");
+    LCD.WriteLine("Middle: Slow");
+    LCD.WriteLine("Right: Hyper");
+    while(true) {
+        //while(!buttons.MiddlePressed());
+        //while(buttons.MiddlePressed());
         /*LCD.WriteLine("Will start on light now");
         while(CdS.Value()>CDS_THRESHOLD);
         LCD.Clear( FEHLCD::White );
@@ -126,16 +129,22 @@ int main(void)
         checkHeading(180);
         driveForward(STD_DRIVE, 20, 0);
         checkYPlus(POINT_G);
-        Sleep(SLEEP_TIME);
-        driveForward(FAST_DRIVE, 15, 0);*/
+        Sleep(SLEEP_TIME);*/
+        if(buttons.LeftPressed()) { Sleep(2.0); driveForward(FAST_DRIVE, 15, 0); }
+        else if(buttons.MiddlePressed()) { Sleep(2.0); driveForward(STD_DRIVE, 15, 0); }
+        else if(buttons.RightPressed()) { Sleep(2.0); driveForward(HYPER_DRIVE, 15, 0); }
 
-    //}
-    while(true) {
+    }
+    /*while(true) {
+        LCD.Clear();
+        LCD.Write("X: ");
         LCD.WriteLine(RPS.X());
+        LCD.Write("Y: ");
         LCD.WriteLine(RPS.Y());
+        LCD.Write("Heading: ");
         LCD.WriteLine(RPS.Heading());
         Sleep(1.0);
-    }
+    }*/
 }
 
 void turnRight(int percent, int degrees, int input_counts) //using encoders
