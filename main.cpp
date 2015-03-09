@@ -23,6 +23,10 @@
 #define POINT_C 52.1
 //The point West of POINT_C
 #define POINT_D 63.7
+//The first salt bag point
+#define POINT_E 20
+//The second salt bag point
+#define POINT_F 25
 //The standard driving percentage
 #define STD_DRIVE 25
 //The fast driving percentage
@@ -74,14 +78,14 @@ int main(void)
     //Set servo limits
     disk.SetMin(SERVO_MIN);
     disk.SetMax(SERVO_MAX);
-    disk.SetDegree(0);
+    disk.SetDegree(20);
     RPS.InitializeMenu();
-    while(true) {
-        LCD.WriteLine("Press the middle button to begin");
-        while(!buttons.MiddlePressed());
-        while(buttons.MiddlePressed());
-        //LCD.WriteLine("Will start on light now");
-        //while(CdS.Value()>CDS_THRESHOLD);
+    //while(true) {
+    //    LCD.WriteLine("Press the middle button to begin");
+    //    while(!buttons.MiddlePressed());
+    //    while(buttons.MiddlePressed());
+        /*LCD.WriteLine("Will start on light now");
+        while(CdS.Value()>CDS_THRESHOLD);
         LCD.Clear( FEHLCD::White );
         driveForward(STD_DRIVE, 13, 0);
         checkYMinus(POINT_A);
@@ -89,14 +93,14 @@ int main(void)
         turnLeft(STD_DRIVE, 90, 0);
         checkHeading(90);
         Sleep(SLEEP_TIME);
-        driveForward(STD_DRIVE, 11, 0);
+        driveForward(STD_DRIVE, 11, -50);
         checkXPlus(POINT_B);
         Sleep(SLEEP_TIME);
         turnLeft(STD_DRIVE, 90, 0);
         checkHeading(180);
         Sleep(SLEEP_TIME);
-        driveForward(FAST_DRIVE, 33, 0);
-        driveForward(STD_DRIVE, 1, 0);
+        driveForward(FAST_DRIVE, 35, 0);
+        driveForward(STD_DRIVE, 2, 0);
         driveForward(SLOW_DRIVE, 1, 0);
         checkYPlus(POINT_C);
         Sleep(SLEEP_TIME);
@@ -107,32 +111,31 @@ int main(void)
         checkYPlus(POINT_D);
         turnRight(STD_DRIVE, 15, 0);
         checkHeading(221.5);
-        //buttonsOrder();
-        //RAM THAT MOFO
-        right_motor.SetPercent(-FAST_DRIVE);
-        left_motor.SetPercent(FAST_DRIVE);
-        Sleep(2.0);
-        driveForward(-STD_DRIVE, 1, 0);
-        Sleep(1.0);
-        right_motor.SetPercent(-FAST_DRIVE);
-        left_motor.SetPercent(FAST_DRIVE);
-        Sleep(2.0);
-        driveForward(-STD_DRIVE, 1, 0);
-        right_motor.SetPercent(-FAST_DRIVE);
-        left_motor.SetPercent(FAST_DRIVE);
-        Sleep(2.0);
-        driveForward(-STD_DRIVE, 1, 0);
-        Sleep(1.0);
-        right_motor.SetPercent(-FAST_DRIVE);
-        left_motor.SetPercent(FAST_DRIVE);
-        Sleep(2.0);
-        driveForward(-STD_DRIVE, 1, 0);
+        buttonsOrder();*/
+        /*driveForward(STD_DRIVE, 10, 0);
+        checkYMinus(POINT_E);
+        Sleep(SLEEP_TIME);
+        turnLeft(STD_DRIVE, 20, 0);
+        checkHeading(20);
+        Sleep(SLEEP_TIME);
+        driveForward(STD_DRIVE, 15, 0);
+        checkYMinus(POINT_F);
+        Sleep(SLEEP_TIME);
+        driveForward(-STD_DRIVE, 2, 0);
+        turnLeft(STD_DRIVE, 160, 0);
+        checkHeading(180);
+        driveForward(STD_DRIVE, 20, 0);
+        checkYPlus(POINT_G);
+        Sleep(SLEEP_TIME);
+        driveForward(FAST_DRIVE, 15, 0);*/
+
+    //}
+    while(true) {
+        LCD.WriteLine(RPS.X());
+        LCD.WriteLine(RPS.Y());
+        LCD.WriteLine(RPS.Heading());
         Sleep(1.0);
     }
-    /*while(true) {
-        LCD.WriteLine(CDS.Value());
-        Sleep(.2);
-    }*/
 }
 
 void turnRight(int percent, int degrees, int input_counts) //using encoders
