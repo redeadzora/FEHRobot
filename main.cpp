@@ -16,17 +16,20 @@
 //The number of counts when 1 degree is turned
 #define COUNTS_PER_DEGREE 233/90
 //The point South of the starting zone
-#define POINT_A 18
-//The point East of POINT_A
-#define POINT_B 31.3
-//The point North of POINT_B
-#define POINT_C 52.1
+#define POINT_A 18.6
+//The point Southeast of POINT_A
+#define POINT_B 8
+//The point 
+#define POINT_C 11.3
 //The point West of POINT_C
-#define POINT_D 63.7
+#define POINT_D 11.3
 //The first salt bag point
-#define POINT_E 20
+#define POINT_E 24
 //The second salt bag point
-#define POINT_F 25
+#define POINT_F 30.7
+#define POINT_G 43.4
+#define POINT_H 48.5
+#define POINT_I 51.8
 //The standard driving percentage
 #define STD_DRIVE 25
 //The fast driving percentage
@@ -85,37 +88,37 @@ int main(void)
     LCD.WriteLine("Middle: Slow");
     LCD.WriteLine("Right: Hyper");
     while(true) {
-        //while(!buttons.MiddlePressed());
-        //while(buttons.MiddlePressed());
-        /*LCD.WriteLine("Will start on light now");
+        while(!buttons.MiddlePressed());
+        while(buttons.MiddlePressed());
+        LCD.WriteLine("Will start on light now");
         while(CdS.Value()>CDS_THRESHOLD);
         LCD.Clear( FEHLCD::White );
-        driveForward(STD_DRIVE, 13, 0);
+        checkHeading(180);
+	driveForward(STD_DRIVE, 13, 0);
         checkYMinus(POINT_A);
         Sleep(SLEEP_TIME);
-        turnLeft(STD_DRIVE, 90, 0);
-        checkHeading(90);
+        turnLeft(STD_DRIVE, 46, 0);
+        checkHeading(226);
         Sleep(SLEEP_TIME);
-        driveForward(STD_DRIVE, 11, -50);
-        checkXPlus(POINT_B);
+        driveForward(STD_DRIVE, 15, 0);
+        checkYMinus(POINT_B);
         Sleep(SLEEP_TIME);
-        turnLeft(STD_DRIVE, 90, 0);
-        checkHeading(180);
+        turnLeft(STD_DRIVE, 2, 0);
+        checkHeading(224);
         Sleep(SLEEP_TIME);
-        driveForward(FAST_DRIVE, 35, 0);
-        driveForward(STD_DRIVE, 2, 0);
-        driveForward(SLOW_DRIVE, 1, 0);
-        checkYPlus(POINT_C);
+        driveForward(STD_DRIVE, 3, 0);
+	Sleep(SLEEP_TIME);
+	driveForward(-STD_DRIVE, 3, 0);
         Sleep(SLEEP_TIME);
-        turnLeft(STD_DRIVE, 56, 0);
-        checkHeading(236);
+        turnLeft(STD_DRIVE, 116, 0);
+        checkHeading(140);
         Sleep(SLEEP_TIME);
-        driveForward(STD_DRIVE, 20, 0);
-        checkYPlus(POINT_D);
+        driveForward(STD_DRIVE, 10, 0);
+        checkXPlus(POINT_F);
         turnRight(STD_DRIVE, 15, 0);
         checkHeading(221.5);
-        buttonsOrder();*/
-        /*driveForward(STD_DRIVE, 10, 0);
+        buttonsOrder();
+        driveForward(STD_DRIVE, 10, 0);
         checkYMinus(POINT_E);
         Sleep(SLEEP_TIME);
         turnLeft(STD_DRIVE, 20, 0);
@@ -129,12 +132,8 @@ int main(void)
         checkHeading(180);
         driveForward(STD_DRIVE, 20, 0);
         checkYPlus(POINT_G);
-        Sleep(SLEEP_TIME);*/
-        if(buttons.LeftPressed()) { Sleep(2.0); driveForward(FAST_DRIVE, 15, 0); }
-        else if(buttons.MiddlePressed()) { Sleep(2.0); driveForward(STD_DRIVE, 15, 0); }
-        else if(buttons.RightPressed()) { Sleep(2.0); driveForward(HYPER_DRIVE, 15, 0); }
-
-    }
+        Sleep(SLEEP_TIME);
+        }
     /*while(true) {
         LCD.Clear();
         LCD.Write("X: ");
