@@ -19,7 +19,7 @@
 #define POINT_A 18.6
 //The point Southeast of POINT_A
 #define POINT_B 8
-//The point 
+//The point
 #define POINT_C 11.3
 //The point West of POINT_C
 #define POINT_D 11.3
@@ -82,11 +82,8 @@ int main(void)
     disk.SetMin(SERVO_MIN);
     disk.SetMax(SERVO_MAX);
     disk.SetDegree(10);
-    //RPS.InitializeMenu();
-    //LCD.WriteLine("Press the middle button to begin");
-    LCD.WriteLine("Left: Fast");
-    LCD.WriteLine("Middle: Slow");
-    LCD.WriteLine("Right: Hyper");
+    RPS.InitializeMenu();
+    LCD.WriteLine("Press the middle button to begin");
     while(true) {
         while(!buttons.MiddlePressed());
         while(buttons.MiddlePressed());
@@ -94,28 +91,28 @@ int main(void)
         while(CdS.Value()>CDS_THRESHOLD);
         LCD.Clear( FEHLCD::White );
         checkHeading(180);
-	driveForward(STD_DRIVE, 13, 0);
+        driveForward(STD_DRIVE, 13, 0);
         checkYMinus(POINT_A);
         Sleep(SLEEP_TIME);
-        turnLeft(STD_DRIVE, 46, 0);
-        checkHeading(226);
+        turnLeft(STD_DRIVE, 42, 0);
+        checkHeading(222);
         Sleep(SLEEP_TIME);
-        driveForward(STD_DRIVE, 15, 0);
-        checkYMinus(POINT_B);
+        driveForward(STD_DRIVE, 14, 0);
+        //checkYMinus(POINT_B-.3);
         Sleep(SLEEP_TIME);
-        turnLeft(STD_DRIVE, 2, 0);
-        checkHeading(224);
+        /*turnLeft(STD_DRIVE, 2, 0);
+        checkHeading(224);*/
         Sleep(SLEEP_TIME);
-        driveForward(STD_DRIVE, 3, 0);
-	Sleep(SLEEP_TIME);
-	driveForward(-STD_DRIVE, 3, 0);
+        /*driveForward(STD_DRIVE, 3, 0);
+        Sleep(SLEEP_TIME);*/
+        driveForward(-STD_DRIVE, 5, 0);
         Sleep(SLEEP_TIME);
-        turnLeft(STD_DRIVE, 116, 0);
+        turnRight(STD_DRIVE, 116, 0);
         checkHeading(140);
         Sleep(SLEEP_TIME);
-        driveForward(STD_DRIVE, 10, 0);
+        driveForward(-STD_DRIVE, 10, 0);
         checkXPlus(POINT_F);
-        turnRight(STD_DRIVE, 15, 0);
+        /*turnRight(STD_DRIVE, 15, 0);
         checkHeading(221.5);
         buttonsOrder();
         driveForward(STD_DRIVE, 10, 0);
@@ -132,7 +129,7 @@ int main(void)
         checkHeading(180);
         driveForward(STD_DRIVE, 20, 0);
         checkYPlus(POINT_G);
-        Sleep(SLEEP_TIME);
+        Sleep(SLEEP_TIME);*/
         }
     /*while(true) {
         LCD.Clear();
@@ -195,7 +192,7 @@ void driveForward(int percent, int inches, int input_counts) {
 void checkXPlus(float x_coordinate) //using RPS while robot is in the +x direction
 {
     //check whether the robot is within an acceptable range
-    while(RPS.X() < x_coordinate - 1 || RPS.X() > x_coordinate + 1)
+    while(RPS.X() < x_coordinate - .5 || RPS.X() > x_coordinate + .5)
     {
         if(RPS.X() > x_coordinate)
         {
@@ -215,7 +212,7 @@ void checkXPlus(float x_coordinate) //using RPS while robot is in the +x directi
 void checkXMinus(float x_coordinate) //using RPS while robot is in the -x direction
 {
     //check whether the robot is within an acceptable range
-    while(RPS.X() < x_coordinate - 1 || RPS.X() > x_coordinate + 1)
+    while(RPS.X() < x_coordinate - .5|| RPS.X() > x_coordinate + .5)
     {
         if(RPS.X() > x_coordinate)
         {
@@ -235,7 +232,7 @@ void checkXMinus(float x_coordinate) //using RPS while robot is in the -x direct
 void checkYMinus(float y_coordinate) //using RPS while robot is in the -y direction
 {
     //check whether the robot is within an acceptable range
-    while(RPS.Y() < y_coordinate - 1 || RPS.Y() > y_coordinate + 1)
+    while(RPS.Y() < y_coordinate - .5 || RPS.Y() > y_coordinate + .5)
     {
         if(RPS.Y() > y_coordinate)
         {
@@ -256,7 +253,7 @@ void checkYMinus(float y_coordinate) //using RPS while robot is in the -y direct
 void checkYPlus(float y_coordinate) //using RPS while robot is in the +y direction
 {
     //check whether the robot is within an acceptable range
-    while(RPS.Y() < y_coordinate - 1 || RPS.Y() > y_coordinate + 1)
+    while(RPS.Y() < y_coordinate - .5 || RPS.Y() > y_coordinate + .5)
     {
         if(RPS.Y() > y_coordinate)
         {
@@ -277,7 +274,7 @@ void checkYPlus(float y_coordinate) //using RPS while robot is in the +y directi
 void checkHeading(float heading) //using RPS
 {
     //Check if the heading is in acceptable range
-    while(RPS.Heading() < heading - 1 || RPS.Heading() > heading + 1)
+    while(RPS.Heading() < heading - .5 || RPS.Heading() > heading + .5)
     {
         if(RPS.Heading() > heading)
         {
