@@ -1,6 +1,7 @@
 /*
  *This is the program that will be loaded onto the
  *Proteus to complete Performance Test 3.
+ *
  * ROBOT NOTE:
  * The left wheel is correct, but the right wheel is backwards.
  */
@@ -29,7 +30,9 @@
 #define POINT_F 30.7
 #define POINT_G 43.4
 #define POINT_H 48.5
-#define POINT_I 51.8
+#define POINT_I 9.8
+#define POINT_J 12.3
+#define POINT_K 6.3
 //The standard driving percentage
 #define STD_DRIVE 25
 //The fast driving percentage
@@ -43,7 +46,7 @@
 //The short sleep time used in RPS checks
 #define SHORT_SLEEP 50
 //The CdS Threshold
-#define CDS_THRESHOLD .6
+#define CDS_THRESHOLD 1
 //The angle to press the red button
 #define RED_ANGLE 90
 //The angle to press the blue button
@@ -97,39 +100,41 @@ int main(void)
         turnLeft(STD_DRIVE, 42, 0);
         checkHeading(222);
         Sleep(SLEEP_TIME);
-        driveForward(STD_DRIVE, 14, 0);
-        //checkYMinus(POINT_B-.3);
+        driveForward(STD_DRIVE, 15, 0);
         Sleep(SLEEP_TIME);
-        /*turnLeft(STD_DRIVE, 2, 0);
-        checkHeading(224);*/
         Sleep(SLEEP_TIME);
-        /*driveForward(STD_DRIVE, 3, 0);
-        Sleep(SLEEP_TIME);*/
         driveForward(-STD_DRIVE, 5, 0);
         Sleep(SLEEP_TIME);
         turnRight(STD_DRIVE, 116, 0);
         checkHeading(140);
         Sleep(SLEEP_TIME);
         driveForward(-STD_DRIVE, 10, 0);
-        checkXPlus(POINT_F);
-        /*turnRight(STD_DRIVE, 15, 0);
-        checkHeading(221.5);
-        buttonsOrder();
-        driveForward(STD_DRIVE, 10, 0);
-        checkYMinus(POINT_E);
+        checkXMinus(POINT_F);
         Sleep(SLEEP_TIME);
-        turnLeft(STD_DRIVE, 20, 0);
-        checkHeading(20);
+        turnLeft(STD_DRIVE, 30, 0);
+        checkHeading(180);
+        Sleep(SLEEP_TIME);
+        driveForward(-FAST_DRIVE, 32, 0);
+        checkYMinus(POINT_G);
+        Sleep(SLEEP_TIME);
+        driveForward(-STD_DRIVE, 15, 0);
+        checkXPlus(POINT_H);
+        Sleep(SLEEP_TIME);
+        turnRight(STD_DRIVE, 100, 0);
+        checkHeading(80.7);
         Sleep(SLEEP_TIME);
         driveForward(STD_DRIVE, 15, 0);
-        checkYMinus(POINT_F);
+        checkXPlus(POINT_I);
         Sleep(SLEEP_TIME);
-        driveForward(-STD_DRIVE, 2, 0);
-        turnLeft(STD_DRIVE, 160, 0);
-        checkHeading(180);
-        driveForward(STD_DRIVE, 20, 0);
-        checkYPlus(POINT_G);
-        Sleep(SLEEP_TIME);*/
+        driveForward(-STD_DRIVE, 2, 20);
+        checkXMinus(POINT_J);
+        turnRight(STD_DRIVE, 34, 0);
+        checkHeading(46);
+        Sleep(SLEEP_TIME);
+        driveForward(STD_DRIVE, 9, 0);
+        checkXMinus(POINT_K);
+        Sleep(SLEEP_TIME);
+        driveForward(-STD_DRIVE, 1, 0);
         }
     /*while(true) {
         LCD.Clear();
@@ -197,13 +202,13 @@ void checkXPlus(float x_coordinate) //using RPS while robot is in the +x directi
         if(RPS.X() > x_coordinate)
         {
             //pulse the motors for a short duration in the correct direction
-            driveForward(-STD_DRIVE, 0, 2);
+            driveForward(-SLOW_DRIVE, 0, 2);
 
         }
         else if(RPS.X() < x_coordinate)
         {
             //pulse the motors for a short duration in the correct direction
-            driveForward(STD_DRIVE, 0, 2);
+            driveForward(SLOW_DRIVE, 0, 2);
         }
         Sleep(SHORT_SLEEP);
     }
@@ -217,13 +222,13 @@ void checkXMinus(float x_coordinate) //using RPS while robot is in the -x direct
         if(RPS.X() > x_coordinate)
         {
             //pulse the motors for a short duration in the correct direction
-            driveForward(STD_DRIVE, 0, 2);
+            driveForward(SLOW_DRIVE, 0, 2);
 
         }
         else if(RPS.X() < x_coordinate)
         {
             //pulse the motors for a short duration in the correct direction
-            driveForward(-STD_DRIVE, 0, 2);
+            driveForward(-SLOW_DRIVE, 0, 2);
         }
         Sleep(SHORT_SLEEP);
     }
@@ -238,13 +243,13 @@ void checkYMinus(float y_coordinate) //using RPS while robot is in the -y direct
         {
             //pulse the motors for a short duration in the correct direction
 
-            driveForward(STD_DRIVE, 0, 2);
+            driveForward(SLOW_DRIVE, 0, 2);
         }
         else if(RPS.Y() < y_coordinate)
         {
             //pulse the motors for a short duration in the correct direction
 
-            driveForward(-STD_DRIVE, 0, 2);
+            driveForward(-SLOW_DRIVE, 0, 2);
         }
         Sleep(SHORT_SLEEP);
     }
@@ -259,13 +264,13 @@ void checkYPlus(float y_coordinate) //using RPS while robot is in the +y directi
         {
             //pulse the motors for a short duration in the correct direction
 
-            driveForward(-STD_DRIVE, 0, 2);
+            driveForward(-SLOW_DRIVE, 0, 2);
         }
         else if(RPS.Y() < y_coordinate)
         {
             //pulse the motors for a short duration in the correct direction
 
-            driveForward(STD_DRIVE, 0, 2);
+            driveForward(SLOW_DRIVE, 0, 2);
         }
         Sleep(SHORT_SLEEP);
     }
@@ -280,13 +285,13 @@ void checkHeading(float heading) //using RPS
         {
             //pulse the motors for a short duration in the correct direction
 
-            turnRight(STD_DRIVE, 0, 1);
+            turnRight(SLOW_DRIVE, 0, 1);
         }
         else if(RPS.Y() < heading)
         {
             //pulse the motors for a short duration in the correct direction
 
-            turnLeft(STD_DRIVE, 0, 1);
+            turnLeft(SLOW_DRIVE, 0, 1);
         }
         Sleep(SHORT_SLEEP);
     }
