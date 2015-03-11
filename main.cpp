@@ -18,20 +18,22 @@
 #define COUNTS_PER_DEGREE 233/90
 //The point South of the starting zone
 #define POINT_A 18.6
-//The point Southeast of POINT_A
+//Points B-E currently unused
 #define POINT_B 8
-//The point
 #define POINT_C 11.3
-//The point West of POINT_C
 #define POINT_D 11.3
-//The first salt bag point
 #define POINT_E 24
-//The second salt bag point
-#define POINT_F 30.7
+//The point by the ramp wall
+#define POINT_F 29.7
+//The point at the top of the ramp
 #define POINT_G 43.4
+//The point in front of the top of the ramp
 #define POINT_H 48.5
+//The point the snow is being plowed to
 #define POINT_I 9.8
+//The point before the garage
 #define POINT_J 12.3
+//The point at the garage
 #define POINT_K 6.3
 //The standard driving percentage
 #define STD_DRIVE 25
@@ -46,7 +48,7 @@
 //The short sleep time used in RPS checks
 #define SHORT_SLEEP 50
 //The CdS Threshold
-#define CDS_THRESHOLD 1
+#define CDS_THRESHOLD .3
 //The angle to press the red button
 #define RED_ANGLE 90
 //The angle to press the blue button
@@ -93,49 +95,67 @@ int main(void)
         LCD.WriteLine("Will start on light now");
         while(CdS.Value()>CDS_THRESHOLD);
         LCD.Clear( FEHLCD::White );
+        //Check Initial Heading
         checkHeading(180);
+        //Drive Forward to first salt bag position
         driveForward(STD_DRIVE, 13, 0);
         checkYMinus(POINT_A);
         Sleep(SLEEP_TIME);
+        //Turn towards the salt bag
         turnLeft(STD_DRIVE, 42, 0);
         checkHeading(222);
         Sleep(SLEEP_TIME);
-        driveForward(STD_DRIVE, 15, 0);
+        //Drive into the salt bag
+        driveForward(STD_DRIVE, 14, 30);
         Sleep(SLEEP_TIME);
-        Sleep(SLEEP_TIME);
+        //Drive back from the salt bag
         driveForward(-STD_DRIVE, 5, 0);
         Sleep(SLEEP_TIME);
-        turnRight(STD_DRIVE, 116, 0);
+        //Turn towards the ramp wall
+        turnRight(STD_DRIVE, 80, 0);
         checkHeading(140);
         Sleep(SLEEP_TIME);
-        driveForward(-STD_DRIVE, 10, 0);
+        //Drive towards the ramp wall
+        driveForward(-STD_DRIVE, 10, 20);
         checkXMinus(POINT_F);
         Sleep(SLEEP_TIME);
+        //Turn towards the ramp
         turnLeft(STD_DRIVE, 30, 0);
         checkHeading(180);
         Sleep(SLEEP_TIME);
-        driveForward(-FAST_DRIVE, 32, 0);
+        //Drive up the ramp
+        driveForward(-FAST_DRIVE, 25, 0);
+        driveForward(-STD_DRIVE, 2, 0);
         checkYMinus(POINT_G);
         Sleep(SLEEP_TIME);
-        driveForward(-STD_DRIVE, 15, 0);
-        checkXPlus(POINT_H);
+        //Drive forward from the ramp
+        driveForward(-STD_DRIVE, 5, 0);
+        checkYMinus(POINT_H);
         Sleep(SLEEP_TIME);
+        //Turn towards the snow pile
         turnRight(STD_DRIVE, 100, 0);
         checkHeading(80.7);
         Sleep(SLEEP_TIME);
-        driveForward(STD_DRIVE, 15, 0);
-        checkXPlus(POINT_I);
+        //Plow the snow forward
+        driveForward(STD_DRIVE, 18, 0);
+        checkXMinus(POINT_I);
         Sleep(SLEEP_TIME);
+        //Pull back from snow
         driveForward(-STD_DRIVE, 2, 20);
         checkXMinus(POINT_J);
+        Sleep(SLEEP_TIME);
+        //Turn towards the garage
         turnRight(STD_DRIVE, 34, 0);
         checkHeading(46);
         Sleep(SLEEP_TIME);
-        driveForward(STD_DRIVE, 9, 0);
-        checkXMinus(POINT_K);
+        //Drive into the garage
+        driveForward(FAST_DRIVE, 9, 0);
+        //checkXMinus(POINT_K);
         Sleep(SLEEP_TIME);
-        driveForward(-STD_DRIVE, 1, 0);
+        //Drive back from the garage
+        driveForward(-STD_DRIVE, 6, 0);
         }
+    //Use this to get RPS readings and CdS Readings
     /*while(true) {
         LCD.Clear();
         LCD.Write("X: ");
@@ -144,7 +164,9 @@ int main(void)
         LCD.WriteLine(RPS.Y());
         LCD.Write("Heading: ");
         LCD.WriteLine(RPS.Heading());
-        Sleep(1.0);
+        LCD.Write("CdS: ");
+        LCD.WriteLine(CdS.Value());
+        Sleep(SLEEP_TIME);
     }*/
 }
 
@@ -189,7 +211,11 @@ void driveForward(int percent, int inches, int input_counts) {
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
     right_motor.SetPercent(-percent);
-    left_motor.SetPercent(percent);
+    if (percent > 0) {
+        left_motor.SetPercent(percent + 2);
+    } else if (percent < 0) {
+        left_motor.SetPercent(percent - 2);
+    }
     while ((left_encoder.Counts() + right_encoder.Counts())/2.<counts);
     right_motor.Stop();
     left_motor.Stop();
