@@ -30,7 +30,7 @@
 //The point in front of the top of the ramp
 #define POINT_H 48.5
 //The point the snow is being plowed to
-#define POINT_I 9.8
+#define POINT_I 10.2
 //The point before the garage
 #define POINT_J 12.3
 //The point at the garage
@@ -105,12 +105,17 @@ int main(void)
         turnLeft(STD_DRIVE, 42, 0);
         checkHeading(222);
         Sleep(SLEEP_TIME);
-        //Drive into the salt bag
-        driveForward(STD_DRIVE, 14, 30);
-        Sleep(SLEEP_TIME);
-        //Drive back from the salt bag
-        driveForward(-STD_DRIVE, 5, 0);
-        Sleep(SLEEP_TIME);
+        //Drive towards the salt bag
+        driveForward(STD_DRIVE, 10, 0);
+        Sleep(SHORT_SLEEP);
+        for (int i = 0; i < 3; i++) {
+            //Drive into the salt bag
+            driveForward(FAST_DRIVE, 5, 0);
+            Sleep(SLEEP_TIME);
+            //Drive back from the salt bag
+            driveForward(-STD_DRIVE, 5, 0);
+            Sleep(SLEEP_TIME);
+        }
         //Turn towards the ramp wall
         turnRight(STD_DRIVE, 80, 0);
         checkHeading(140);
@@ -124,7 +129,7 @@ int main(void)
         checkHeading(180);
         Sleep(SLEEP_TIME);
         //Drive up the ramp
-        driveForward(-FAST_DRIVE, 25, 0);
+        driveForward(-FAST_DRIVE, 26, 0);
         driveForward(-STD_DRIVE, 2, 0);
         checkYMinus(POINT_G);
         Sleep(SLEEP_TIME);
@@ -137,7 +142,7 @@ int main(void)
         checkHeading(80.7);
         Sleep(SLEEP_TIME);
         //Plow the snow forward
-        driveForward(STD_DRIVE, 18, 0);
+        driveForward(STD_DRIVE, 20, 0);
         checkXMinus(POINT_I);
         Sleep(SLEEP_TIME);
         //Pull back from snow
@@ -149,11 +154,35 @@ int main(void)
         checkHeading(46);
         Sleep(SLEEP_TIME);
         //Drive into the garage
-        driveForward(FAST_DRIVE, 9, 0);
+        driveForward(FAST_DRIVE, 8, 20);
         //checkXMinus(POINT_K);
         Sleep(SLEEP_TIME);
         //Drive back from the garage
         driveForward(-STD_DRIVE, 6, 0);
+        Sleep(SLEEP_TIME);
+        //Turn back towards the wall
+        turnLeft(STD_DRIVE, 30, 0);
+        checkHeading(90);
+        Sleep(SLEEP_TIME);
+        //Drive towards the wall
+        driveForward(-STD_DRIVE, 20, 0);
+        checkXPlus(POINT_F);
+        Sleep(SLEEP_TIME);
+        //Turn toward the ramp
+        turnLeft(STD_DRIVE, 90, 0);
+        checkHeading(180);
+        Sleep(SLEEP_TIME);
+        //Drive down the ramp
+        driveForward(STD_DRIVE, 25, 0);
+        checkYPlus(33.4);
+        Sleep(SLEEP_TIME);
+        //Turn towards the lever
+        turnLeft(STD_DRIVE, 90, 0);
+        checkHeading(90);
+        Sleep(SLEEP_TIME);
+        //Drive into the lever
+        driveForward(-STD_DRIVE, 20, 0);
+        Sleep(SLEEP_TIME);
         }
     //Use this to get RPS readings and CdS Readings
     /*while(true) {
@@ -211,11 +240,12 @@ void driveForward(int percent, int inches, int input_counts) {
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
     right_motor.SetPercent(-percent);
-    if (percent > 0) {
+    left_motor.SetPercent(percent);
+    /*if (percent > 0) {
         left_motor.SetPercent(percent + 2);
     } else if (percent < 0) {
         left_motor.SetPercent(percent - 2);
-    }
+    }*/
     while ((left_encoder.Counts() + right_encoder.Counts())/2.<counts);
     right_motor.Stop();
     left_motor.Stop();
@@ -304,6 +334,25 @@ void checkYPlus(float y_coordinate) //using RPS while robot is in the +y directi
 
 void checkHeading(float heading) //using RPS
 {
+    if (-1 < heading && heading < 1) {
+        heading += 180;
+        while((RPS.Heading() + 180) < heading - .5 || (RPS.Heading() +  180) > heading + .5)
+        {
+            if((RPS.Heading() + 180) > heading)
+            {
+                //pulse the motors for a short duration in the correct direction
+
+                turnRight(STD_DRIVE, 0, 1);
+            }
+            else if((RPS.Heading() + 180) < heading)
+            {
+                //pulse the motors for a short duration in the correct direction
+
+                turnLeft(STD_DRIVE, 0, 1);
+            }
+            Sleep(SHORT_SLEEP);
+        }
+    }
     //Check if the heading is in acceptable range
     while(RPS.Heading() < heading - .5 || RPS.Heading() > heading + .5)
     {
@@ -311,13 +360,13 @@ void checkHeading(float heading) //using RPS
         {
             //pulse the motors for a short duration in the correct direction
 
-            turnRight(SLOW_DRIVE, 0, 1);
+            turnRight(STD_DRIVE, 0, 1);
         }
-        else if(RPS.Y() < heading)
+        else if(RPS.Heading() < heading)
         {
             //pulse the motors for a short duration in the correct direction
 
-            turnLeft(SLOW_DRIVE, 0, 1);
+            turnLeft(STD_DRIVE, 0, 1);
         }
         Sleep(SHORT_SLEEP);
     }
