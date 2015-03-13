@@ -108,7 +108,7 @@ int main(void)
         //Drive towards the salt bag
         driveForward(STD_DRIVE, 10, 0);
         Sleep(SHORT_SLEEP);
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 2; i++) {
             //Drive into the salt bag
             driveForward(FAST_DRIVE, 5, 0);
             Sleep(SLEEP_TIME);
@@ -166,22 +166,26 @@ int main(void)
         Sleep(SLEEP_TIME);
         //Drive towards the wall
         driveForward(-STD_DRIVE, 20, 0);
-        checkXPlus(POINT_F);
+        checkXMinus(POINT_F);
         Sleep(SLEEP_TIME);
         //Turn toward the ramp
         turnLeft(STD_DRIVE, 90, 0);
         checkHeading(180);
         Sleep(SLEEP_TIME);
         //Drive down the ramp
-        driveForward(STD_DRIVE, 25, 0);
-        checkYPlus(33.4);
+        driveForward(STD_DRIVE, 20, 0);
+        checkYMinus(21.8);
         Sleep(SLEEP_TIME);
         //Turn towards the lever
-        turnLeft(STD_DRIVE, 90, 0);
-        checkHeading(90);
+        turnRight(STD_DRIVE, 55, 0);
+        checkHeading(126);
         Sleep(SLEEP_TIME);
+        driveForward(STD_DRIVE, 10, 0);
+        checkXMinus(21);
+        turnRight(STD_DRIVE, 180, 0);
+        //checkHeading(270);
         //Drive into the lever
-        driveForward(-STD_DRIVE, 20, 0);
+        driveForward(-STD_DRIVE, 13, 0);
         Sleep(SLEEP_TIME);
         }
     //Use this to get RPS readings and CdS Readings
