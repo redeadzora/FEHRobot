@@ -18,12 +18,14 @@
 //The number of counts when 1 degree is turned
 #define COUNTS_PER_DEGREE 233/90
 //The point South of the starting zone
-#define POINT_A 18.6
+#define POINT_A 19.6
 //The point at the bottom of the ramp
-#define POINT_B 30.5
-//Points C-E currently unused
+#define POINT_B 28.5
+//The point at the top of the ramp
 #define POINT_C 52.1
-#define POINT_D 57.9
+//The point at the crank
+#define POINT_D 57.7
+//Point E currently unused
 #define POINT_E 24
 //The point by the ramp wall
 #define POINT_F 29.7
@@ -50,7 +52,7 @@
 //The short sleep time used in RPS checks
 #define SHORT_SLEEP 50
 //The CdS Threshold
-#define CDS_THRESHOLD .3
+#define CDS_THRESHOLD .4
 //The CdS Red Value
 #define CDS_RED .223
 //The CdS Blue Value
@@ -66,7 +68,7 @@
 //Servo motor minimum
 #define SERVO_MIN 510
 //Servo motor maximum
-#define SERVO_MAX 2280
+#define SERVO_MAX 2260
 //Declare the various sensors and motors
 ButtonBoard buttons(FEHIO::Bank3); //Button Board
 FEHServo disk( FEHServo::Servo0); //Disk Mechanism
@@ -95,19 +97,22 @@ int main(void)
     //Set servo limits
     disk.SetMin(SERVO_MIN);
     disk.SetMax(SERVO_MAX);
-    disk.SetDegree(10);
+    disk.SetDegree(0);
     RPS.InitializeMenu();
     LCD.WriteLine("Press the middle button to begin");
     while(true) {
         while(!buttons.MiddlePressed());
         while(buttons.MiddlePressed());
         LCD.WriteLine("Will start on light now");
-        while(CdS.Value()>CDS_THRESHOLD);
+        while(CdS.Value()>CDS_THRESHOLD) {
+            LCD.WriteRC(CdS.Value(), 5, 12);
+            Sleep(1.0);
+        }
         LCD.Clear( FEHLCD::White );
         //Check Initial Heading
         checkHeading(180);
         //Drive to the first forward position
-        driveForward(STD_DRIVE, 13, 0);
+        driveForward(STD_DRIVE, 14, 0);
         checkYMinus(POINT_A);
         Sleep(SLEEP_TIME);
         //Turn towards the wall
@@ -115,7 +120,7 @@ int main(void)
         checkHeading(90);
         Sleep(SLEEP_TIME);
         //Drive to the wall
-        driveForward(-STD_DRIVE, 13, -50);
+        driveForward(-STD_DRIVE, 12, 0);
         checkXMinus(POINT_B);
         Sleep(SLEEP_TIME);
         //Turn towards the ramp
@@ -123,7 +128,7 @@ int main(void)
         checkHeading(180);
         Sleep(SLEEP_TIME);
         //Drive up the ramp
-        driveForward(-FAST_DRIVE, 35, 0);
+        driveForward(-FAST_DRIVE, 36, 0);
         driveForward(-STD_DRIVE, 2, 0);
         driveForward(-SLOW_DRIVE, 1, 0);
         checkYMinus(POINT_C);
@@ -138,22 +143,38 @@ int main(void)
         //Turn the crank the proper direction
         if(direction == 1) { //CW
             for (int i = 0; i < 3; i++) {
+                LCD.WriteLine("CW (RED)");
                 disk.SetDegree(0);
+                Sleep(SLEEP_TIME);
                 driveForward(STD_DRIVE, 1, 0);
+                Sleep(SLEEP_TIME);
                 disk.SetDegree(180);
+                Sleep(SLEEP_TIME);
                 driveForward(-STD_DRIVE, 1, 0);
+                Sleep(SLEEP_TIME);
             }
         } else if (direction == 2) { //CCW
             for (int i = 0; i < 3; i++) {
+                LCD.WriteLine("CCW (BLUE)");
                 disk.SetDegree(180);
+                Sleep(SLEEP_TIME);
                 driveForward(STD_DRIVE, 1, 0);
+                Sleep(SLEEP_TIME);
                 disk.SetDegree(0);
+                Sleep(SLEEP_TIME);
                 driveForward(-STD_DRIVE, 1, 0);
+                Sleep(SLEEP_TIME);
             }
         } else if (direction == 0) {
             LCD.WriteLine("The CdS cell cannot read the light color.");
+
         }
-        /*//Drive Forward to first salt bag position
+        while(true) {
+            LCD.WriteRC(CdS.Value(), 5, 12);
+            Sleep(1.0);
+        }
+        /*
+        //Drive Forward to first salt bag position
         driveForward(STD_DRIVE, 13, 0);
         checkYMinus(POINT_A);
         Sleep(SLEEP_TIME);
@@ -245,7 +266,7 @@ int main(void)
         Sleep(SLEEP_TIME);*/
         }
     //Use this to get RPS readings and CdS Readings
-    /*while(true) {
+   /* while(true) {
         LCD.Clear();
         LCD.Write("X: ");
         LCD.WriteLine(RPS.X());
@@ -548,13 +569,12 @@ void buttonsOrder()
 }
 int crankDirection() {
     //Crank needs turned Right (CW)
-    if (CdS.Value() > CDS_RED + .2 && CdS.Value() < CDS_RED - .2) {
+    if (CdS.Value() < 1.35) {
         return 1;
-    }
-    //Crank needs turned Left (CCW)
-    if (CdS.Value() > CDS_BLUE + .2 && CdS.Value() < CDS_BLUE - .2) {
+    } else {     //Crank needs turned Left (CCW)
+
         return 2;
-    } else {
+    } /*else {
         return 0;
-    }
+    }*/
 }
