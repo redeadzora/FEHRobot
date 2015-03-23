@@ -1,6 +1,6 @@
 /*
  *This is the program that will be loaded onto the
- *Proteus to complete Performance Test 3.
+ *Proteus to complete Performance Test 4.
  *
  * ROBOT NOTE:
  * The left wheel is correct, but the right wheel is backwards.
