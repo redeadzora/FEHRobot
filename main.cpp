@@ -19,8 +19,9 @@
 #define COUNTS_PER_DEGREE 233/90
 //The point South of the starting zone
 #define POINT_A 18.6
-//Points B-E currently unused
-#define POINT_B 8
+//The point at the bottom of the ramp
+#define POINT_B 30.5
+//Points C-E currently unused
 #define POINT_C 52.1
 #define POINT_D 57.9
 #define POINT_E 24
@@ -110,22 +111,22 @@ int main(void)
         checkYMinus(POINT_A);
         Sleep(SLEEP_TIME);
         //Turn towards the wall
-        turnRight(90);
+        turnRight(STD_DRIVE, 90, 0);
         checkHeading(90);
         Sleep(SLEEP_TIME);
         //Drive to the wall
-        driveForward(-STD_DRIVE, 11, -50);
+        driveForward(-STD_DRIVE, 13, -50);
         checkXMinus(POINT_B);
         Sleep(SLEEP_TIME);
         //Turn towards the ramp
-        turnLeft(90);
+        turnLeft(STD_DRIVE, 90, 0);
         checkHeading(180);
         Sleep(SLEEP_TIME);
         //Drive up the ramp
         driveForward(-FAST_DRIVE, 35, 0);
         driveForward(-STD_DRIVE, 2, 0);
         driveForward(-SLOW_DRIVE, 1, 0);
-        checkYMinuus(POINT_C);
+        checkYMinus(POINT_C);
         Sleep(SLEEP_TIME);
         //Drive to the light
         driveForward(-STD_DRIVE, 5, 0);
@@ -137,16 +138,16 @@ int main(void)
         //Turn the crank the proper direction
         if(direction == 1) { //CW
             for (int i = 0; i < 3; i++) {
-                disk.SetDegrees(0);
+                disk.SetDegree(0);
                 driveForward(STD_DRIVE, 1, 0);
-                disk.SetDegrees(180);
+                disk.SetDegree(180);
                 driveForward(-STD_DRIVE, 1, 0);
             }
         } else if (direction == 2) { //CCW
             for (int i = 0; i < 3; i++) {
-                disk.SetDegrees(180);
+                disk.SetDegree(180);
                 driveForward(STD_DRIVE, 1, 0);
-                disk.SetDegrees(0);
+                disk.SetDegree(0);
                 driveForward(-STD_DRIVE, 1, 0);
             }
         } else if (direction == 0) {
