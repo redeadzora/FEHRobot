@@ -1,9 +1,10 @@
 /*
  *This is the program that will be loaded onto the
- *Proteus to complete Performance Test 4.
+ *Proteus to complete Performance Test 5.
  *
  * ROBOT NOTE:
- * The left wheel is correct, but the right wheel is backwards.
+ * The right wheel is correct, but the left wheel is backwards.
+ * This applies when driving with the forklift forwards.
  */
 
 #include <FEHLCD.h>
@@ -20,8 +21,8 @@
 #define POINT_A 18.6
 //Points B-E currently unused
 #define POINT_B 8
-#define POINT_C 11.3
-#define POINT_D 11.3
+#define POINT_C 52.1
+#define POINT_D 57.9
 #define POINT_E 24
 //The point by the ramp wall
 #define POINT_F 29.7
@@ -49,6 +50,12 @@
 #define SHORT_SLEEP 50
 //The CdS Threshold
 #define CDS_THRESHOLD .3
+//The CdS Red Value
+#define CDS_RED .223
+//The CdS Blue Value
+#define CDS_BLUE .347
+//The CdS light off value
+#define CDS_OFF .89
 //The angle to press the red button
 #define RED_ANGLE 90
 //The angle to press the blue button
@@ -78,6 +85,7 @@ void checkYPlus(float y_coordinate);
 void checkYMinus(float y_coordinate);
 void checkHeading(float heading);
 void buttonsOrder();
+int crankDirection();
 
 int main(void)
 {
@@ -97,7 +105,54 @@ int main(void)
         LCD.Clear( FEHLCD::White );
         //Check Initial Heading
         checkHeading(180);
-        //Drive Forward to first salt bag position
+        //Drive to the first forward position
+        driveForward(STD_DRIVE, 13, 0);
+        checkYMinus(POINT_A);
+        Sleep(SLEEP_TIME);
+        //Turn towards the wall
+        turnRight(90);
+        checkHeading(90);
+        Sleep(SLEEP_TIME);
+        //Drive to the wall
+        driveForward(-STD_DRIVE, 11, -50);
+        checkXMinus(POINT_B);
+        Sleep(SLEEP_TIME);
+        //Turn towards the ramp
+        turnLeft(90);
+        checkHeading(180);
+        Sleep(SLEEP_TIME);
+        //Drive up the ramp
+        driveForward(-FAST_DRIVE, 35, 0);
+        driveForward(-STD_DRIVE, 2, 0);
+        driveForward(-SLOW_DRIVE, 1, 0);
+        checkYMinuus(POINT_C);
+        Sleep(SLEEP_TIME);
+        //Drive to the light
+        driveForward(-STD_DRIVE, 5, 0);
+        checkYMinus(POINT_D);
+        Sleep(SLEEP_TIME);
+        //Check light value
+        int direction = crankDirection();
+        Sleep(SLEEP_TIME);
+        //Turn the crank the proper direction
+        if(direction == 1) { //CW
+            for (int i = 0; i < 3; i++) {
+                disk.SetDegrees(0);
+                driveForward(STD_DRIVE, 1, 0);
+                disk.SetDegrees(180);
+                driveForward(-STD_DRIVE, 1, 0);
+            }
+        } else if (direction == 2) { //CCW
+            for (int i = 0; i < 3; i++) {
+                disk.SetDegrees(180);
+                driveForward(STD_DRIVE, 1, 0);
+                disk.SetDegrees(0);
+                driveForward(-STD_DRIVE, 1, 0);
+            }
+        } else if (direction == 0) {
+            LCD.WriteLine("The CdS cell cannot read the light color.");
+        }
+        /*//Drive Forward to first salt bag position
         driveForward(STD_DRIVE, 13, 0);
         checkYMinus(POINT_A);
         Sleep(SLEEP_TIME);
@@ -186,7 +241,7 @@ int main(void)
         //checkHeading(270);
         //Drive into the lever
         driveForward(-STD_DRIVE, 13, 0);
-        Sleep(SLEEP_TIME);
+        Sleep(SLEEP_TIME);*/
         }
     //Use this to get RPS readings and CdS Readings
     /*while(true) {
@@ -488,5 +543,17 @@ void buttonsOrder()
             Sleep(SLEEP_TIME);
             driveForward(-SLOW_DRIVE, 2, 0);
         }
+    }
+}
+int crankDirection() {
+    //Crank needs turned Right (CW)
+    if (CdS.Value() > CDS_RED + .2 && CdS.Value() < CDS_RED - .2) {
+        return 1;
+    }
+    //Crank needs turned Left (CCW)
+    if (CdS.Value() > CDS_BLUE + .2 && CdS.Value() < CDS_BLUE - .2) {
+        return 2;
+    } else {
+        return 0;
     }
 }
