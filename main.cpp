@@ -98,7 +98,7 @@ int main(void)
     //Set servo limits
     disk.SetMin(SERVO_MIN);
     disk.SetMax(SERVO_MAX);
-    disk.SetDegree(10);
+    disk.SetDegree(13);
     RPS.InitializeMenu();
     LCD.WriteLine("Press the middle button to begin");
     while(true) {
@@ -177,17 +177,17 @@ int main(void)
         //Drive to the light and set disk to proper angle
         checkHeading(180);
         disk.SetDegree(108);
-        driveForward(-STD_DRIVE, 5, 0);
-        checkYMinus(POINT_D);
+        driveForward(-STD_DRIVE, 5, -10);
+        //checkYMinus(POINT_D);
         Sleep(SLEEP_TIME);
         //Check light value
         int direction = crankDirection();
         Sleep(SLEEP_TIME);
         //Turn the crank the proper direction
-        if(direction == 1) { //CW
-            for (int i = 0; i < 3; i++) {
-                LCD.WriteLine("CW (RED)");
-                disk.SetDegree(10);
+        if(direction == 2) { //CCW
+            for (int i = 0; i < 4; i++) {
+                LCD.WriteLine("CCW (BLUE)");
+                disk.SetDegree(13);
                 Sleep(SLEEP_TIME);
                 driveForward(STD_DRIVE, 1, 0);
                 Sleep(SLEEP_TIME);
@@ -196,14 +196,14 @@ int main(void)
                 driveForward(-STD_DRIVE, 1, 0);
                 Sleep(SLEEP_TIME);
             }
-        } else if (direction == 2) { //CCW
-            for (int i = 0; i < 3; i++) {
-                LCD.WriteLine("CCW (BLUE)");
+        } else if (direction == 1) { //CW
+            for (int i = 0; i < 4; i++) {
+                LCD.WriteLine("CW (RED)");
                 disk.SetDegree(180);
                 Sleep(SLEEP_TIME);
                 driveForward(STD_DRIVE, 1, 0);
                 Sleep(SLEEP_TIME);
-                disk.SetDegree(10);
+                disk.SetDegree(13);
                 Sleep(SLEEP_TIME);
                 driveForward(-STD_DRIVE, 1, 0);
                 Sleep(SLEEP_TIME);
@@ -211,10 +211,6 @@ int main(void)
         } else if (direction == 0) {
             LCD.WriteLine("The CdS cell cannot read the light color.");
 
-        }
-        while(true) {
-            LCD.WriteRC(CdS.Value(), 5, 12);
-            Sleep(1.0);
         }
         /*
         //Drive forward from the ramp
@@ -255,21 +251,26 @@ int main(void)
         //Turn toward the ramp
         turnLeft(STD_DRIVE, 90, 0);
         checkHeading(180);
-        Sleep(SLEEP_TIME);
+        Sleep(SLEEP_TIME);*/
         //Drive down the ramp
-        driveForward(STD_DRIVE, 20, 0);
+        driveForward(STD_DRIVE, 30, 0);
         checkYMinus(21.8);
         Sleep(SLEEP_TIME);
         //Turn towards the lever
-        turnRight(STD_DRIVE, 55, 0);
-        checkHeading(126);
+        turnRight(STD_DRIVE, 90, 0);
+        checkHeading(90);
         Sleep(SLEEP_TIME);
-        driveForward(STD_DRIVE, 10, 0);
-        checkXMinus(21);
-        turnRight(STD_DRIVE, 180, 0);
-        //checkHeading(270);
+        driveForward(STD_DRIVE, 13, 0);
+        checkXMinus(17.2);
+        Sleep(SLEEP_TIME);
+        turnLeft(STD_DRIVE, 90, 0);
+        checkHeading(180);
+        Sleep(SLEEP_TIME);
+        disk.SetDegree(0);
+        Sleep(SLEEP_TIME);
         //Drive into the lever
-        driveForward(-STD_DRIVE, 13, 0);
+        driveForward(FAST_DRIVE, 20, 0);
+       /* driveForward(-STD_DRIVE, 13, 0);
         Sleep(SLEEP_TIME);*/
         }
     //Use this to get RPS readings and CdS Readings
