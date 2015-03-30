@@ -1,6 +1,6 @@
 /*
  *This is the program that will be loaded onto the
- *Proteus to complete Performance Test 5.
+ *Proteus to complete the Individual Competition.
  *
  * ROBOT NOTE:
  * The right wheel is correct, but the left wheel is backwards.
@@ -40,7 +40,7 @@
 //The point at the garage
 #define POINT_K 6.3
 //The standard driving percentage
-#define STD_DRIVE 25
+#define STD_DRIVE 30
 //The fast driving percentage
 #define FAST_DRIVE 50
 //The slow driving percentage
@@ -59,12 +59,14 @@
 #define CDS_BLUE .347
 //The CdS light off value
 #define CDS_OFF .89
+//The crank threshold
+#define CDS_CRANK 1.35
 //The angle to press the red button
-#define RED_ANGLE 90
+#define RED_ANGLE 39
 //The angle to press the blue button
-#define BLUE_ANGLE 90
+#define BLUE_ANGLE 164
 //The angle to press the white button
-#define WHITE_ANGLE 90
+#define WHITE_ANGLE 91
 //Servo motor minimum
 #define SERVO_MIN 510
 //Servo motor maximum
@@ -89,7 +91,8 @@ void checkYPlus(float y_coordinate);
 void checkYMinus(float y_coordinate);
 void checkHeading(float heading);
 void buttonsOrder();
-int crankDirection();
+void crankDirection();
+void oilRun();
 
 int main(void)
 {
@@ -112,7 +115,6 @@ int main(void)
         LCD.Clear( FEHLCD::White );
         //Check Initial Heading
         checkHeading(180);
-        /*
         //Drive Forward to first salt bag position
         driveForward(STD_DRIVE, 13, 0);
         checkYMinus(POINT_A);
@@ -126,17 +128,16 @@ int main(void)
         Sleep(SHORT_SLEEP);
         for (int i = 0; i < 2; i++) {
             //Drive into the salt bag
-            driveForward(FAST_DRIVE, 5, 0);
+            right_motor.SetPercent(-FAST_DRIVE);
+            left_motor.SetPercent(FAST_DRIVE);
+            Sleep(5.0);
+            right_motor.Stop();
+            left_motor.Stop();
             Sleep(SLEEP_TIME);
             //Drive back from the salt bag
             driveForward(-STD_DRIVE, 5, 0);
             Sleep(SLEEP_TIME);
-        }*/
-        //Drive to the first forward position
-        driveForward(STD_DRIVE, 14, 0);
-        checkYMinus(POINT_A);
-        Sleep(SLEEP_TIME);
-        /*
+        }
         //Turn towards the ramp wall
         turnRight(STD_DRIVE, 80, 0);
         checkHeading(140);
@@ -150,71 +151,22 @@ int main(void)
         checkHeading(180);
         Sleep(SLEEP_TIME);
         //Drive up the ramp
-        driveForward(-FAST_DRIVE, 26, 0);
-        driveForward(-STD_DRIVE, 2, 0);
-        checkYMinus(POINT_G);
-        Sleep(SLEEP_TIME);*/
-        //Turn towards the wall
-        turnRight(STD_DRIVE, 90, 0);
-        checkHeading(90);
-        Sleep(SLEEP_TIME);
-        //Drive to the wall
-        driveForward(-STD_DRIVE, 12, 0);
-        checkXMinus(POINT_B);
-        Sleep(SLEEP_TIME);
-        //Turn towards the ramp
-        turnLeft(STD_DRIVE, 90, 0);
-        checkHeading(180);
-        Sleep(SLEEP_TIME);
-        //Drive up the ramp
         driveForward(-FAST_DRIVE, 36, 0);
         driveForward(-STD_DRIVE, 2, 0);
         driveForward(-SLOW_DRIVE, 1, 0);
         checkYMinus(POINT_C);
         Sleep(SLEEP_TIME);
-        //Check Y position
-        //curveCheck(POINT_E);
         //Drive to the light and set disk to proper angle
         checkHeading(180);
         disk.SetDegree(108);
         driveForward(-STD_DRIVE, 5, -10);
         //checkYMinus(POINT_D);
         Sleep(SLEEP_TIME);
-        //Check light value
-        int direction = crankDirection();
+        //Turn the crank in the proper direction
+        crankDirection();
         Sleep(SLEEP_TIME);
-        //Turn the crank the proper direction
-        if(direction == 2) { //CCW
-            for (int i = 0; i < 4; i++) {
-                LCD.WriteLine("CCW (BLUE)");
-                disk.SetDegree(13);
-                Sleep(SLEEP_TIME);
-                driveForward(STD_DRIVE, 1, 0);
-                Sleep(SLEEP_TIME);
-                disk.SetDegree(180);
-                Sleep(SLEEP_TIME);
-                driveForward(-STD_DRIVE, 1, 0);
-                Sleep(SLEEP_TIME);
-            }
-        } else if (direction == 1) { //CW
-            for (int i = 0; i < 4; i++) {
-                LCD.WriteLine("CW (RED)");
-                disk.SetDegree(180);
-                Sleep(SLEEP_TIME);
-                driveForward(STD_DRIVE, 1, 0);
-                Sleep(SLEEP_TIME);
-                disk.SetDegree(13);
-                Sleep(SLEEP_TIME);
-                driveForward(-STD_DRIVE, 1, 0);
-                Sleep(SLEEP_TIME);
-            }
-        } else if (direction == 0) {
-            LCD.WriteLine("The CdS cell cannot read the light color.");
-
-        }
-        /*
-        //Drive forward from the ramp
-        driveForward(-STD_DRIVE, 5, 0);
+        //Drive backwards from the crank
+        driveForward(STD_DRIVE, 5, 0);
         checkYMinus(POINT_H);
         Sleep(SLEEP_TIME);
         //Turn towards the snow pile
@@ -238,8 +190,26 @@ int main(void)
         //checkXMinus(POINT_K);
         Sleep(SLEEP_TIME);
         //Drive back from the garage
-        driveForward(-STD_DRIVE, 6, 0);
+        driveForward(-STD_DRIVE, 2, 0);
         Sleep(SLEEP_TIME);
+        //Turn towards the positive-y wall
+        turnLeft(STD_DRIVE, 90, 0);
+        checkHeading(132);
+        Sleep(SLEEP_TIME);
+        //Drive forward
+        driveForward(-STD_DRIVE, 3, 0);
+        checkYMinus(61);
+        Sleep(SLEEP_TIME);
+        //Turn towards the buttons
+        turnLeft(STD_DRIVE, 90, 0);
+        checkHeading(222);
+        Sleep(SLEEP_TIME);
+        //Drive towards the buttons
+        driveForward(-STD_DRIVE, 2, 0);
+        checkXPlus(12.8);
+        Sleep(SLEEP_TIME);
+        //Press the buttons in order
+        buttonsOrder();
         //Turn back towards the wall
         turnLeft(STD_DRIVE, 30, 0);
         checkHeading(90);
@@ -251,27 +221,25 @@ int main(void)
         //Turn toward the ramp
         turnLeft(STD_DRIVE, 90, 0);
         checkHeading(180);
-        Sleep(SLEEP_TIME);*/
+        Sleep(SLEEP_TIME);
         //Drive down the ramp
         driveForward(STD_DRIVE, 30, 0);
         checkYMinus(21.8);
         Sleep(SLEEP_TIME);
-        //Turn towards the lever
+        //Turn towards negative-x wall
         turnRight(STD_DRIVE, 90, 0);
         checkHeading(90);
         Sleep(SLEEP_TIME);
+        //Drive towards the negative-x wall
         driveForward(STD_DRIVE, 13, 0);
         checkXMinus(17.2);
         Sleep(SLEEP_TIME);
+        //Turn towards the negative-y wall
         turnLeft(STD_DRIVE, 90, 0);
         checkHeading(180);
         Sleep(SLEEP_TIME);
-        disk.SetDegree(0);
-        Sleep(SLEEP_TIME);
-        //Drive into the lever
-        driveForward(FAST_DRIVE, 20, 0);
-       /* driveForward(-STD_DRIVE, 13, 0);
-        Sleep(SLEEP_TIME);*/
+        //Drive into the lever in the correct direction
+        oilRun();
         }
     //Use this to get RPS readings and CdS Readings
    /* while(true) {
@@ -491,124 +459,165 @@ void buttonsOrder()
 {
     int red = RPS.RedButtonOrder();
     int blue = RPS.BlueButtonOrder();
+    int time = TimeNow();
     //int white = RPS.WhiteBurronOrder();
-    if (red == 1) {
-        if (blue == 2) {
-            //Press red
-            disk.SetDegree(RED_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
-            //Press blue
-            disk.SetDegree(BLUE_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
-            //Press white
-            disk.SetDegree(WHITE_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
+    while (RPS.ButtonsPressed() != 3 && TimeNow() - time < 10) {
+        if (red == 1) {
+            if (blue == 2) {
+                //Press red
+                disk.SetDegree(RED_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+                //Press blue
+                disk.SetDegree(BLUE_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+                //Press white
+                disk.SetDegree(WHITE_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+            }
+            else {
+                //Press red
+                disk.SetDegree(RED_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+                //Press white
+                disk.SetDegree(WHITE_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+                //Press blue
+                disk.SetDegree(BLUE_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+            }
+        }
+        else if (blue == 1) {
+            if (red == 2) {
+                //Press blue
+                disk.SetDegree(BLUE_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+                //Press red
+                disk.SetDegree(RED_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+                //Press white
+                disk.SetDegree(WHITE_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+            }
+            else {
+                //Press blue
+                disk.SetDegree(BLUE_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+                //Press white
+                disk.SetDegree(WHITE_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+                //Press red
+                disk.SetDegree(RED_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+            }
         }
         else {
-            //Press red
-            disk.SetDegree(RED_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
-            //Press white
-            disk.SetDegree(WHITE_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
-            //Press blue
-            disk.SetDegree(BLUE_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
-        }
-    }
-    else if (blue == 1) {
-        if (red == 2) {
-            //Press blue
-            disk.SetDegree(BLUE_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
-            //Press red
-            disk.SetDegree(RED_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
-            //Press white
-            disk.SetDegree(WHITE_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
-        }
-        else {
-            //Press blue
-            disk.SetDegree(BLUE_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
-            //Press white
-            disk.SetDegree(WHITE_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
-            //Press red
-            disk.SetDegree(RED_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
-        }
-    }
-    else {
-        if (blue == 2) {
-            //Press white
-            disk.SetDegree(WHITE_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
-            //Press blue
-            disk.SetDegree(BLUE_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
-            //Press red
-            disk.SetDegree(RED_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
-        }
-        else {
-            //Press white
-            disk.SetDegree(WHITE_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
-            //Press red
-            disk.SetDegree(RED_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
-            //Press blue
-            disk.SetDegree(BLUE_ANGLE);
-            driveForward(SLOW_DRIVE, 2, 0);
-            Sleep(SLEEP_TIME);
-            driveForward(-SLOW_DRIVE, 2, 0);
+            if (blue == 2) {
+                //Press white
+                disk.SetDegree(WHITE_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+                //Press blue
+                disk.SetDegree(BLUE_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+                //Press red
+                disk.SetDegree(RED_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+            }
+            else {
+                //Press white
+                disk.SetDegree(WHITE_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+                //Press red
+                disk.SetDegree(RED_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+                //Press blue
+                disk.SetDegree(BLUE_ANGLE);
+                driveForward(SLOW_DRIVE, 2, 0);
+                Sleep(SLEEP_TIME);
+                driveForward(-SLOW_DRIVE, 2, 0);
+            }
         }
     }
 }
-int crankDirection() {
+void crankDirection() {
     //Crank needs turned Right (CW)
-    if (CdS.Value() < 1.35) {
-        return 1;
+    if (CdS.Value() < CDS_CRANK) {
+        for (int i = 0; i < 4; i++) {
+            LCD.WriteLine("CW (RED)");
+            disk.SetDegree(180);
+            Sleep(SLEEP_TIME);
+            driveForward(STD_DRIVE, 1, 0);
+            Sleep(SLEEP_TIME);
+            disk.SetDegree(13);
+            Sleep(SLEEP_TIME);
+            driveForward(-STD_DRIVE, 1, 0);
+            Sleep(SLEEP_TIME);
+        }
     } else {     //Crank needs turned Left (CCW)
-
-        return 2;
+        for (int i = 0; i < 4; i++) {
+            LCD.WriteLine("CCW (BLUE)");
+            disk.SetDegree(13);
+            Sleep(SLEEP_TIME);
+            driveForward(STD_DRIVE, 1, 0);
+            Sleep(SLEEP_TIME);
+            disk.SetDegree(180);
+            Sleep(SLEEP_TIME);
+            driveForward(-STD_DRIVE, 1, 0);
+            Sleep(SLEEP_TIME);
+        }
     } /*else {
-        return 0;
+        LCD.WriteLine("The CdS cell cannot read the light color.");
     }*/
+}
+void oilRun() {
+    while(RPS.OilPress() == 0) {
+        if (RPS.OilDirec() == 1) {
+            //Push the lever mechanism down
+            disk.SetDegree(0);
+            Sleep(SLEEP_TIME);
+            //Drive into the lever
+            driveForward(FAST_DRIVE, 20, 0);
+        } else if (RPS.OilDirec() == 0) {
+            //Drive past the lever
+            driveForward(STD_DRIVE, 15, 0);
+            //Push the lever mechanism down
+            disk.SetDegree(0);
+            Sleep(SLEEP_TIME);
+            //Drive into the lever
+            driveForward(-FAST_DRIVE, 20, 0);
+        }
+    }
 }
