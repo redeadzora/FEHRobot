@@ -1,6 +1,6 @@
 /*
- *This is the program that will be loaded onto the
- *Proteus to complete the Individual Competition.
+ * This is the program that will be loaded onto the
+ * Proteus to complete the Individual Competition.
  *
  * ROBOT NOTE:
  * The right wheel is correct, but the left wheel is backwards.
@@ -28,7 +28,7 @@
 //The necessary position for cranking
 #define POINT_E 30.7
 //The point by the ramp wall
-#define POINT_F 29.7
+#define POINT_F 28.5
 //The point at the top of the ramp
 #define POINT_G 43.4
 //The point in front of the top of the ramp
@@ -81,28 +81,44 @@ DigitalEncoder left_encoder( FEHIO::P0_2); //Left encoder
 AnalogInputPin CdS( FEHIO::P1_0); //CdS cell
 //DigitalInputPin right_bump( FEHIO::P1_2); //Right bump switch (if used)
 //Prototypes for each function
-void curveCheck(int x_coordinate) ;
+void timedDrive(int percent, float time);
+void curveCheck(int x_coordinate, bool fire);
 void turnRight(int percent, int degrees, int input_counts);
 void turnLeft(int percent, int degrees, int input_counts);
 void driveForward(int percent, int inches, int input_counts);
-void checkXPlus(float x_coordinate);
-void checkXMinus(float x_coordinate);
-void checkYPlus(float y_coordinate);
-void checkYMinus(float y_coordinate);
-void checkHeading(float heading);
-void buttonsOrder();
+void checkXPlus(float x_coordinate, bool fire);
+void checkXMinus(float x_coordinate, bool fire);
+void checkYPlus(float y_coordinate, bool fire);
+void checkYMinus(float y_coordinate, bool fire);
+void checkHeading(float heading, bool fire);
+void buttonsOrder(bool fire);
 void crankDirection();
 void oilRun();
 
 int main(void)
 {
+    bool RPSFire = false;
     LCD.Clear( FEHLCD::White );
     LCD.SetFontColor( FEHLCD::Black );
     //Set servo limits
     disk.SetMin(SERVO_MIN);
     disk.SetMax(SERVO_MAX);
     disk.SetDegree(13);
-    RPS.InitializeMenu();
+    LCD.WriteLine("Is the RPS on fire? (L = Y, R = N)");
+    while(!buttons.MiddlePressed()) {
+        if (buttons.LeftPressed()) {
+            RPSFire = true;
+            LCD.WriteLine("Press middle now.");
+            Sleep(SLEEP_TIME);
+        } else if (buttons.RightPressed()) {
+            RPSFire = false;
+            RPS.InitializeMenu();
+            LCD.WriteLine("Press middle now.");
+            Sleep(SLEEP_TIME);
+        }
+    }
+    Sleep(SLEEP_TIME);
+    LCD.Clear( FEHLCD::White );
     LCD.WriteLine("Press the middle button to begin");
     while(true) {
         while(!buttons.MiddlePressed());
@@ -114,25 +130,21 @@ int main(void)
         }
         LCD.Clear( FEHLCD::White );
         //Check Initial Heading
-        checkHeading(180);
+        checkHeading(180, RPSFire);
         //Drive Forward to first salt bag position
         driveForward(STD_DRIVE, 13, 0);
-        checkYMinus(POINT_A);
+        checkYMinus(POINT_A, RPSFire);
         Sleep(SLEEP_TIME);
         //Turn towards the salt bag
         turnLeft(STD_DRIVE, 42, 0);
-        checkHeading(222);
+        checkHeading(222, RPSFire);
         Sleep(SLEEP_TIME);
         //Drive towards the salt bag
         driveForward(STD_DRIVE, 10, 0);
         Sleep(SHORT_SLEEP);
         for (int i = 0; i < 2; i++) {
             //Drive into the salt bag
-            right_motor.SetPercent(-FAST_DRIVE);
-            left_motor.SetPercent(FAST_DRIVE);
-            Sleep(5.0);
-            right_motor.Stop();
-            left_motor.Stop();
+            timedDrive(FAST_DRIVE, 3.0);
             Sleep(SLEEP_TIME);
             //Drive back from the salt bag
             driveForward(-STD_DRIVE, 5, 0);
@@ -140,103 +152,105 @@ int main(void)
         }
         //Turn towards the ramp wall
         turnRight(STD_DRIVE, 80, 0);
-        checkHeading(140);
+        checkHeading(140, RPSFire);
         Sleep(SLEEP_TIME);
         //Drive towards the ramp wall
-        driveForward(-STD_DRIVE, 10, 20);
-        checkXMinus(POINT_F);
+        driveForward(-STD_DRIVE, 9, 20);
+        checkXMinus(POINT_F, RPSFire);
         Sleep(SLEEP_TIME);
         //Turn towards the ramp
         turnLeft(STD_DRIVE, 30, 0);
-        checkHeading(180);
+        checkHeading(180, RPSFire);
         Sleep(SLEEP_TIME);
         //Drive up the ramp
-        driveForward(-FAST_DRIVE, 36, 0);
+        driveForward(-FAST_DRIVE, 34, 0);
         driveForward(-STD_DRIVE, 2, 0);
         driveForward(-SLOW_DRIVE, 1, 0);
-        checkYMinus(POINT_C);
+        checkYMinus(POINT_C, RPSFire);
         Sleep(SLEEP_TIME);
         //Drive to the light and set disk to proper angle
-        checkHeading(180);
+        checkHeading(180, RPSFire);
         disk.SetDegree(108);
-        driveForward(-STD_DRIVE, 5, -10);
-        //checkYMinus(POINT_D);
+        timedDrive(STD_DRIVE, 3.0);
+        //checkYMinus(POINT_D, RPSFire);
         Sleep(SLEEP_TIME);
         //Turn the crank in the proper direction
         crankDirection();
         Sleep(SLEEP_TIME);
         //Drive backwards from the crank
         driveForward(STD_DRIVE, 5, 0);
-        checkYMinus(POINT_H);
+        checkYMinus(POINT_H, RPSFire);
         Sleep(SLEEP_TIME);
         //Turn towards the snow pile
         turnRight(STD_DRIVE, 100, 0);
-        checkHeading(80.7);
+        checkHeading(80.7, RPSFire);
         Sleep(SLEEP_TIME);
         //Plow the snow forward
-        driveForward(STD_DRIVE, 20, 0);
-        checkXMinus(POINT_I);
+        timedDrive(STD_DRIVE, 2.5);
         Sleep(SLEEP_TIME);
         //Pull back from snow
         driveForward(-STD_DRIVE, 2, 20);
-        checkXMinus(POINT_J);
+        checkXMinus(POINT_J, RPSFire);
         Sleep(SLEEP_TIME);
         //Turn towards the garage
         turnRight(STD_DRIVE, 34, 0);
-        checkHeading(46);
+        checkHeading(46, RPSFire);
         Sleep(SLEEP_TIME);
         //Drive into the garage
-        driveForward(FAST_DRIVE, 8, 20);
-        //checkXMinus(POINT_K);
+        timedDrive(FAST_DRIVE, 2.0);
+        //checkXMinus(POINT_K, RPSFire);
         Sleep(SLEEP_TIME);
         //Drive back from the garage
         driveForward(-STD_DRIVE, 2, 0);
         Sleep(SLEEP_TIME);
         //Turn towards the positive-y wall
         turnLeft(STD_DRIVE, 90, 0);
-        checkHeading(132);
+        checkHeading(132, RPSFire);
         Sleep(SLEEP_TIME);
         //Drive forward
-        driveForward(-STD_DRIVE, 3, 0);
-        checkYMinus(61);
+        driveForward(-STD_DRIVE, 5, 0);
+        checkYMinus(61, RPSFire);
         Sleep(SLEEP_TIME);
         //Turn towards the buttons
         turnLeft(STD_DRIVE, 90, 0);
-        checkHeading(222);
+        checkHeading(222, RPSFire);
         Sleep(SLEEP_TIME);
         //Drive towards the buttons
         driveForward(-STD_DRIVE, 2, 0);
-        checkXPlus(12.8);
+        checkXPlus(13.5, RPSFire);
         Sleep(SLEEP_TIME);
         //Press the buttons in order
-        buttonsOrder();
+        buttonsOrder(RPSFire);
+        //Back up
+        driveForward(STD_DRIVE, 13, 0);
+        Sleep(SLEEP_TIME);
         //Turn back towards the wall
-        turnLeft(STD_DRIVE, 30, 0);
-        checkHeading(90);
+        turnRight(STD_DRIVE, 100, 0);
+        checkHeading(90, RPSFire);
         Sleep(SLEEP_TIME);
         //Drive towards the wall
         driveForward(-STD_DRIVE, 20, 0);
-        checkXMinus(POINT_F);
+        checkXMinus(POINT_F, RPSFire);
         Sleep(SLEEP_TIME);
         //Turn toward the ramp
         turnLeft(STD_DRIVE, 90, 0);
-        checkHeading(180);
+        checkHeading(180, RPSFire);
         Sleep(SLEEP_TIME);
         //Drive down the ramp
         driveForward(STD_DRIVE, 30, 0);
-        checkYMinus(21.8);
+        checkYMinus(21.8, RPSFire);
         Sleep(SLEEP_TIME);
         //Turn towards negative-x wall
         turnRight(STD_DRIVE, 90, 0);
-        checkHeading(90);
+        checkHeading(90, RPSFire);
         Sleep(SLEEP_TIME);
         //Drive towards the negative-x wall
         driveForward(STD_DRIVE, 13, 0);
-        checkXMinus(17.2);
+        checkXMinus(17.2, RPSFire);
         Sleep(SLEEP_TIME);
         //Turn towards the negative-y wall
         turnLeft(STD_DRIVE, 90, 0);
-        checkHeading(180);
+        checkHeading(180, RPSFire);
         Sleep(SLEEP_TIME);
         //Drive into the lever in the correct direction
         oilRun();
@@ -255,7 +269,15 @@ int main(void)
         Sleep(SLEEP_TIME);
     }*/
 }
-void curveCheck(int x_coordinate)
+void timedDrive(int percent, float time) {
+    right_motor.SetPercent(-percent);
+    left_motor.SetPercent(percent);
+    Sleep(time);
+    left_motor.Stop();
+    right_motor.Stop();
+}
+
+void curveCheck(int x_coordinate, bool fire)
 {
     while(RPS.X() < x_coordinate - .5 || RPS.X() > x_coordinate + .5)
     {
@@ -264,7 +286,7 @@ void curveCheck(int x_coordinate)
         {
             right_motor.Stop();
             left_motor.Stop();
-            checkHeading(180);
+            checkHeading(180, fire);
             right_motor.SetPercent(20);
             left_motor.SetPercent(15);
         }
@@ -272,14 +294,14 @@ void curveCheck(int x_coordinate)
         {
             right_motor.Stop();
             left_motor.Stop();
-            checkHeading(180);
+            checkHeading(180, fire);
             right_motor.SetPercent(15);
             left_motor.SetPercent(20);
         }
     }
     right_motor.Stop();
     left_motor.Stop();
-    checkHeading(180);
+    checkHeading(180, fire);
 }
 
 void turnRight(int percent, int degrees, int input_counts) //using encoders
@@ -333,10 +355,10 @@ void driveForward(int percent, int inches, int input_counts) {
     right_motor.Stop();
     left_motor.Stop();
 }
-void checkXPlus(float x_coordinate) //using RPS while robot is in the +x direction
+void checkXPlus(float x_coordinate, bool fire) //using RPS while robot is in the +x direction
 {
     //check whether the robot is within an acceptable range
-    while(RPS.X() < x_coordinate - .5 || RPS.X() > x_coordinate + .5)
+    while(!fire && (RPS.X() < x_coordinate - .5 || RPS.X() > x_coordinate + .5))
     {
         if(RPS.X() > x_coordinate)
         {
@@ -353,10 +375,10 @@ void checkXPlus(float x_coordinate) //using RPS while robot is in the +x directi
     }
 }
 
-void checkXMinus(float x_coordinate) //using RPS while robot is in the -x direction
+void checkXMinus(float x_coordinate, bool fire) //using RPS while robot is in the -x direction
 {
     //check whether the robot is within an acceptable range
-    while(RPS.X() < x_coordinate - .5|| RPS.X() > x_coordinate + .5)
+    while(!fire && (RPS.X() < x_coordinate - .5|| RPS.X() > x_coordinate + .5))
     {
         if(RPS.X() > x_coordinate)
         {
@@ -373,10 +395,10 @@ void checkXMinus(float x_coordinate) //using RPS while robot is in the -x direct
     }
 }
 
-void checkYMinus(float y_coordinate) //using RPS while robot is in the -y direction
+void checkYMinus(float y_coordinate, bool fire) //using RPS while robot is in the -y direction
 {
     //check whether the robot is within an acceptable range
-    while(RPS.Y() < y_coordinate - .5 || RPS.Y() > y_coordinate + .5)
+    while(!fire && (RPS.Y() < y_coordinate - .5 || RPS.Y() > y_coordinate + .5))
     {
         if(RPS.Y() > y_coordinate)
         {
@@ -394,10 +416,10 @@ void checkYMinus(float y_coordinate) //using RPS while robot is in the -y direct
     }
 }
 
-void checkYPlus(float y_coordinate) //using RPS while robot is in the +y direction
+void checkYPlus(float y_coordinate, bool fire) //using RPS while robot is in the +y direction
 {
     //check whether the robot is within an acceptable range
-    while(RPS.Y() < y_coordinate - .5 || RPS.Y() > y_coordinate + .5)
+    while(!fire && (RPS.Y() < y_coordinate - .5 || RPS.Y() > y_coordinate + .5))
     {
         if(RPS.Y() > y_coordinate)
         {
@@ -415,9 +437,9 @@ void checkYPlus(float y_coordinate) //using RPS while robot is in the +y directi
     }
 }
 
-void checkHeading(float heading) //using RPS
+void checkHeading(float heading, bool fire) //using RPS
 {
-    if (-1 < heading && heading < 1) {
+    if (!fire && (-1 < heading && heading < 1)) {
         heading += 180;
         while((RPS.Heading() + 180) < heading - .5 || (RPS.Heading() +  180) > heading + .5)
         {
@@ -437,7 +459,7 @@ void checkHeading(float heading) //using RPS
         }
     }
     //Check if the heading is in acceptable range
-    while(RPS.Heading() < heading - .5 || RPS.Heading() > heading + .5)
+    while(!fire && (RPS.Heading() < heading - .5 || RPS.Heading() > heading + .5))
     {
         if(RPS.Heading() > heading)
         {
@@ -455,119 +477,122 @@ void checkHeading(float heading) //using RPS
     }
 }
 
-void buttonsOrder()
+void buttonsOrder(bool fire)
 {
-    int red = RPS.RedButtonOrder();
-    int blue = RPS.BlueButtonOrder();
+    int red = 1, blue = 2;
+    if (!fire) {
+        red = RPS.RedButtonOrder();
+        blue = RPS.BlueButtonOrder();
+    }
     int time = TimeNow();
     //int white = RPS.WhiteBurronOrder();
     while (RPS.ButtonsPressed() != 3 && TimeNow() - time < 10) {
         if (red == 1) {
+            //Press red
+            disk.SetDegree(RED_ANGLE);
+            driveForward(STD_DRIVE, 2, 0);
+            Sleep(SLEEP_TIME);
+            timedDrive(-STD_DRIVE, .5);
+            Sleep(SLEEP_TIME);
             if (blue == 2) {
-                //Press red
-                disk.SetDegree(RED_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
-                Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
                 //Press blue
                 disk.SetDegree(BLUE_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
+                driveForward(STD_DRIVE, 2, 0);
                 Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
+                timedDrive(-STD_DRIVE, .5);
+                Sleep(SLEEP_TIME);
                 //Press white
                 disk.SetDegree(WHITE_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
+                driveForward(STD_DRIVE, 2, 0);
                 Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
+                timedDrive(-STD_DRIVE, .5);
+                Sleep(SLEEP_TIME);
             }
             else {
-                //Press red
-                disk.SetDegree(RED_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
-                Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
                 //Press white
                 disk.SetDegree(WHITE_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
+                driveForward(STD_DRIVE, 2, 0);
                 Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
+                timedDrive(-STD_DRIVE, .5);
+                Sleep(SLEEP_TIME);
                 //Press blue
                 disk.SetDegree(BLUE_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
+                driveForward(STD_DRIVE, 2, 0);
                 Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
+                timedDrive(-STD_DRIVE, .5);
+                Sleep(SLEEP_TIME);
             }
         }
         else if (blue == 1) {
+            //Press blue
+            disk.SetDegree(BLUE_ANGLE);
+            driveForward(STD_DRIVE, 2, 0);
+            Sleep(SLEEP_TIME);
+            timedDrive(-STD_DRIVE, .5);
+            Sleep(SLEEP_TIME);
             if (red == 2) {
-                //Press blue
-                disk.SetDegree(BLUE_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
-                Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
                 //Press red
                 disk.SetDegree(RED_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
+                driveForward(STD_DRIVE, 2, 0);
                 Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
+                timedDrive(-STD_DRIVE, .5);
+                Sleep(SLEEP_TIME);
                 //Press white
                 disk.SetDegree(WHITE_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
+                driveForward(STD_DRIVE, 2, 0);
                 Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
+                timedDrive(-STD_DRIVE, .5);
+                Sleep(SLEEP_TIME);
             }
             else {
-                //Press blue
-                disk.SetDegree(BLUE_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
-                Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
                 //Press white
                 disk.SetDegree(WHITE_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
+                driveForward(STD_DRIVE, 2, 0);
                 Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
+                timedDrive(-STD_DRIVE, .5);
+                Sleep(SLEEP_TIME);
                 //Press red
                 disk.SetDegree(RED_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
+                driveForward(STD_DRIVE, 2, 0);
                 Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
+                timedDrive(-STD_DRIVE, .5);
+                Sleep(SLEEP_TIME);
             }
         }
         else {
+            //Press white
+            disk.SetDegree(WHITE_ANGLE);
+            driveForward(STD_DRIVE, 2, 0);
+            Sleep(SLEEP_TIME);
+            timedDrive(-STD_DRIVE, .5);
+            Sleep(SLEEP_TIME);
             if (blue == 2) {
-                //Press white
-                disk.SetDegree(WHITE_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
-                Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
                 //Press blue
                 disk.SetDegree(BLUE_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
+                driveForward(STD_DRIVE, 2, 0);
                 Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
+                timedDrive(-STD_DRIVE, .5);
+                Sleep(SLEEP_TIME);
                 //Press red
                 disk.SetDegree(RED_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
+                driveForward(STD_DRIVE, 2, 0);
                 Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
+                timedDrive(-STD_DRIVE, .5);
+                Sleep(SLEEP_TIME);
             }
             else {
-                //Press white
-                disk.SetDegree(WHITE_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
-                Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
                 //Press red
                 disk.SetDegree(RED_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
+                driveForward(STD_DRIVE, 2, 0);
                 Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
+                timedDrive(-STD_DRIVE, .5);
+                Sleep(SLEEP_TIME);
                 //Press blue
                 disk.SetDegree(BLUE_ANGLE);
-                driveForward(SLOW_DRIVE, 2, 0);
+                driveForward(STD_DRIVE, 2, 0);
                 Sleep(SLEEP_TIME);
-                driveForward(-SLOW_DRIVE, 2, 0);
+                timedDrive(-STD_DRIVE, .5);
+                Sleep(SLEEP_TIME);
             }
         }
     }
@@ -575,8 +600,8 @@ void buttonsOrder()
 void crankDirection() {
     //Crank needs turned Right (CW)
     if (CdS.Value() < CDS_CRANK) {
+        LCD.WriteLine("CW (RED)");
         for (int i = 0; i < 4; i++) {
-            LCD.WriteLine("CW (RED)");
             disk.SetDegree(180);
             Sleep(SLEEP_TIME);
             driveForward(STD_DRIVE, 1, 0);
@@ -587,8 +612,8 @@ void crankDirection() {
             Sleep(SLEEP_TIME);
         }
     } else {     //Crank needs turned Left (CCW)
+        LCD.WriteLine("CCW (BLUE)");
         for (int i = 0; i < 4; i++) {
-            LCD.WriteLine("CCW (BLUE)");
             disk.SetDegree(13);
             Sleep(SLEEP_TIME);
             driveForward(STD_DRIVE, 1, 0);
@@ -607,17 +632,17 @@ void oilRun() {
         if (RPS.OilDirec() == 1) {
             //Push the lever mechanism down
             disk.SetDegree(0);
-            Sleep(SLEEP_TIME);
+            Sleep(SLEEP_TIME*2);
             //Drive into the lever
-            driveForward(FAST_DRIVE, 20, 0);
+            timedDrive(FAST_DRIVE, 2.0);
         } else if (RPS.OilDirec() == 0) {
             //Drive past the lever
             driveForward(STD_DRIVE, 15, 0);
             //Push the lever mechanism down
             disk.SetDegree(0);
-            Sleep(SLEEP_TIME);
+            Sleep(SLEEP_TIME*2);
             //Drive into the lever
-            driveForward(-FAST_DRIVE, 20, 0);
+            timedDrive(FAST_DRIVE, 2.0);
         }
     }
 }
