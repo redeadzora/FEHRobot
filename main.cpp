@@ -171,7 +171,7 @@ int main(void)
         //Drive to the light and set disk to proper angle
         checkHeading(180, RPSFire);
         disk.SetDegree(108);
-        timedDrive(STD_DRIVE, 3.0);
+        timedDrive(-STD_DRIVE, 3.0);
         //checkYMinus(POINT_D, RPSFire);
         Sleep(SLEEP_TIME);
         //Turn the crank in the proper direction
