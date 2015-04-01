@@ -92,20 +92,24 @@ void oilRun();
 
 int main(void)
 {
+    //Variable for whether the RPS works
     bool RPSFire = false;
-    LCD.Clear( FEHLCD::White );
+    //Set up LCD
+    LCD.Clear( FEHLCD::Green );
     LCD.SetFontColor( FEHLCD::Black );
-    //Set servo limits
+    //Set servo limits and initial position
     disk.SetMin(SERVO_MIN);
     disk.SetMax(SERVO_MAX);
     disk.SetDegree(17);
-    LCD.WriteLine("Is the RPS on fire? (L = Y, R = N)");
+    //Ask whether the RPS is working
+    LCD.WriteLine("Is the RPS on fire? \n(L = Y, R = N)");
     while(!buttons.MiddlePressed()) {
         if (buttons.LeftPressed()) {
             RPSFire = true;
             LCD.WriteLine("Press middle now.");
             Sleep(SLEEP_TIME);
         } else if (buttons.RightPressed()) {
+            Sleep(SHORT_SLEEP);
             RPSFire = false;
             RPS.InitializeMenu();
             LCD.WriteLine("Press middle now.");
@@ -113,7 +117,7 @@ int main(void)
         }
     }
     Sleep(SLEEP_TIME);
-    LCD.Clear( FEHLCD::White );
+    LCD.Clear( FEHLCD::Green );
     while(true) {
         LCD.WriteLine("Press the middle button to begin");
         while(!buttons.MiddlePressed());
@@ -124,7 +128,7 @@ int main(void)
             LCD.WriteRC(Battery.Voltage(), 7, 12);
             Sleep(1.0);
         }
-        LCD.Clear( FEHLCD::White );
+        LCD.Clear( FEHLCD::Green );
         //Check Initial Heading
         checkHeading(180, RPSFire);
         //Drive Forward to first salt bag position
@@ -242,8 +246,8 @@ int main(void)
         checkHeading(90, RPSFire);
         Sleep(SLEEP_TIME);
         //Drive towards the negative-x wall
-        driveForward(STD_DRIVE, 13, 0);
-        checkXMinus(17.2, RPSFire);
+        driveForward(STD_DRIVE, 13, 20);
+        checkXMinus(17.7, RPSFire);
         Sleep(SLEEP_TIME);
         //Turn towards the negative-y wall
         turnLeft(STD_DRIVE, 90, 0);
@@ -486,7 +490,7 @@ void buttonsOrder(bool fire)
     }
     int time = TimeNow();
     //int white = RPS.WhiteBurronOrder();
-    while (RPS.ButtonsPressed() != 3 && TimeNow() - time < 10) {
+    while (!(RPS.BlueButtonPressed() && RPS.RedButtonPressed() && RPS.WhiteButtonPressed()) && TimeNow() - time < 10) {
         if (red == 1) {
             //Press red
             disk.SetDegree(RED_ANGLE);
@@ -596,14 +600,19 @@ void buttonsOrder(bool fire)
             }
         }
     }
+    LCD.WriteLine(RPS.ButtonsPressed());
 }
 void crankDirection() {
     //Crank needs turned Right (CW)
     if (CdS.Value() < CDS_CRANK) {
         LCD.WriteLine("CW (RED)");
         for (int i = 0; i < 4; i++) {
+            right_motor.SetPercent(SLOW_DRIVE);
+            left_motor.SetPercent(-SLOW_DRIVE);
             disk.SetDegree(180);
             Sleep(SLEEP_TIME);
+            right_motor.Stop();
+            left_motor.Stop();
             driveForward(STD_DRIVE, 1, 0);
             Sleep(SLEEP_TIME);
             disk.SetDegree(17);
@@ -614,8 +623,12 @@ void crankDirection() {
     } else {     //Crank needs turned Left (CCW)
         LCD.WriteLine("CCW (BLUE)");
         for (int i = 0; i < 4; i++) {
+            right_motor.SetPercent(SLOW_DRIVE);
+            left_motor.SetPercent(-SLOW_DRIVE);
             disk.SetDegree(17);
             Sleep(SLEEP_TIME);
+            right_motor.Stop();
+            left_motor.Stop();
             driveForward(STD_DRIVE, 1, 0);
             Sleep(SLEEP_TIME);
             disk.SetDegree(180);
@@ -637,7 +650,8 @@ void oilRun() {
             timedDrive(FAST_DRIVE, 2.0);
         } else if (RPS.OilDirec() == 0) {
             //Drive past the lever
-            driveForward(STD_DRIVE, 15, 0);
+            driveForward(STD_DRIVE, 10, 0);
+            timedDrive(STD_DRIVE, .5);
             //Push the lever mechanism down
             disk.SetDegree(0);
             Sleep(SLEEP_TIME*2);
@@ -645,6 +659,4 @@ void oilRun() {
             timedDrive(-FAST_DRIVE, 2.0);
         }
     }
-    LCD.WriteLine("buttons pressed: ");
-    LCD.Write(RPS.ButtonsPressed());
 }
