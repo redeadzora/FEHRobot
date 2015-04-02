@@ -19,7 +19,7 @@
 //The number of counts when 1 degree is turned
 #define COUNTS_PER_DEGREE 233/90
 //The point South of the starting zone
-#define POINT_A 20.1
+#define POINT_A 20.0
 //The point at the bottom of the ramp
 #define POINT_B 28.5
 //The point at the top of the ramp
@@ -33,13 +33,21 @@
 //The point at the top of the ramp
 #define POINT_G 43.4
 //The point in front of the top of the ramp
-#define POINT_H 49.5
-//The point the snow is being plowed to
+#define POINT_H 48.7
+//The point to which the snow is being plowed
 #define POINT_I 10.2
 //The point before the garage
 #define POINT_J 12.3
 //The point at the garage
 #define POINT_K 6.3
+//The point in front of, but a bit back from, the buttons
+#define POINT_L 60.2
+//The point directly in front of the buttons
+#define POINT_M 13.5
+//The point at the bottom of the ramp (heading down)
+#define POINT_N 21.8
+//The point north of the pump
+#define POINT_O 17.1
 //The standard driving percentage
 #define STD_DRIVE 35
 //The fast driving percentage
@@ -55,7 +63,7 @@
 //The CdS Threshold
 #define CDS_THRESHOLD .55
 //The crank threshold
-#define CDS_CRANK .5
+#define CDS_CRANK .54
 //The angle to press the red button
 #define RED_ANGLE 39
 //The angle to press the blue button
@@ -76,6 +84,7 @@ DigitalEncoder left_encoder( FEHIO::P0_2); //Left encoder
 AnalogInputPin CdS( FEHIO::P1_0); //CdS cell
 //DigitalInputPin right_bump( FEHIO::P1_2); //Right bump switch (if used)
 //Prototypes for each function
+void readings();
 void timedDrive(int percent, float time);
 void curveCheck(int x_coordinate, bool fire);
 void turnRight(int percent, int degrees, int input_counts);
@@ -150,20 +159,26 @@ int main(void)
         bottomRun(RPSFire);
         //Drive into the lever in the correct direction
         oilRun();
+        //Get readings
+        readings();
         }
-    //Use this to get RPS readings and CdS Readings
-   /* while(true) {
-        LCD.Clear();
-        LCD.Write("X: ");
-        LCD.WriteLine(RPS.X());
-        LCD.Write("Y: ");
-        LCD.WriteLine(RPS.Y());
-        LCD.Write("Heading: ");
-        LCD.WriteLine(RPS.Heading());
-        LCD.Write("CdS: ");
-        LCD.WriteLine(CdS.Value());
-        Sleep(SLEEP_TIME);
-    }*/
+
+}
+//Use this to get RPS readings and CdS Readings
+void readings() {
+    while(!buttons.MiddlePressed()) {
+            LCD.Clear();
+            LCD.WriteLine("Press Middle to exit");
+            LCD.Write("X: ");
+            LCD.WriteLine(RPS.X());
+            LCD.Write("Y: ");
+            LCD.WriteLine(RPS.Y());
+            LCD.Write("Heading: ");
+            LCD.WriteLine(RPS.Heading());
+            LCD.Write("CdS: ");
+            LCD.WriteLine(CdS.Value());
+            Sleep(SLEEP_TIME);
+        }
 }
 //Drive forward by time, no shaft encoder usage.
 void timedDrive(int percent, float time) {
@@ -564,7 +579,8 @@ void saltRun(bool RPSFire) {
     //Check Initial Heading
     checkHeading(180, RPSFire);
     //Drive Forward to first salt bag position
-    driveForward(STD_DRIVE, 12, 20);
+    driveForward(STD_DRIVE, 10, 20);
+    driveForward(SLOW_DRIVE, 2, 0);
     checkYMinus(POINT_A, RPSFire);
     Sleep(SLEEP_TIME);
     //Turn towards the salt bag
@@ -613,7 +629,7 @@ void crankRun (bool RPSFire) {
 //Drive into the garage
 void garageRun(bool RPSFire) {
     //Drive backwards from the crank
-    driveForward(STD_DRIVE, 7, 0);
+    driveForward(STD_DRIVE, 7, 25);
     checkYMinus(POINT_H, RPSFire);
     Sleep(SLEEP_TIME);
     //Turn towards the snow pile
@@ -646,8 +662,8 @@ void buttonsRun(bool RPSFire) {
     checkHeading(132, RPSFire);
     Sleep(SLEEP_TIME);
     //Drive forward
-    driveForward(-STD_DRIVE, 7, 0);
-    checkYMinus(61, RPSFire);
+    driveForward(-STD_DRIVE, 6, 10);
+    checkYMinus(POINT_L, RPSFire);
     Sleep(SLEEP_TIME);
     //Turn towards the buttons
     turnLeft(STD_DRIVE, 90, 0);
@@ -655,7 +671,7 @@ void buttonsRun(bool RPSFire) {
     Sleep(SLEEP_TIME);
     //Drive towards the buttons
     driveForward(-STD_DRIVE, 2, 0);
-    checkXPlus(13.5, RPSFire);
+    checkXPlus(POINT_M, RPSFire);
     Sleep(SLEEP_TIME);
 }
 //Drive back to the bottom level
@@ -677,15 +693,15 @@ void bottomRun(bool RPSFire) {
     Sleep(SLEEP_TIME);
     //Drive down the ramp
     driveForward(STD_DRIVE, 33, 0);
-    checkYMinus(21.8, RPSFire);
+    checkYMinus(POINT_N, RPSFire);
     Sleep(SLEEP_TIME);
     //Turn towards negative-x wall
     turnRight(STD_DRIVE, 90, 0);
     checkHeading(90, RPSFire);
     Sleep(SLEEP_TIME);
     //Drive towards the negative-x wall
-    driveForward(STD_DRIVE, 11, 20);
-    checkXMinus(17.9, RPSFire);
+    driveForward(STD_DRIVE, 11, 30);
+    checkXMinus(POINT_O, RPSFire);
     Sleep(SLEEP_TIME);
     //Turn towards the negative-y wall
     turnLeft(STD_DRIVE, 90, 0);
