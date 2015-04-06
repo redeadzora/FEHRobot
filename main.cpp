@@ -1,6 +1,6 @@
 /*
  * This is the program that will be loaded onto the
- * Proteus to complete the Individual Competition.
+ * Proteus to compete in the Final Competition. This is it.
  *
  * ROBOT NOTE:
  * The right wheel is correct, but the left wheel is backwards.
@@ -164,7 +164,9 @@ int main(void)
         }
 
 }
-//Use this to get RPS readings and CdS Readings
+/*************************************************
+ * Use this to get RPS readings and CdS Readings *
+ *************************************************/
 void readings() {
     while(!buttons.MiddlePressed()) {
             LCD.Clear();
@@ -180,7 +182,9 @@ void readings() {
             Sleep(SLEEP_TIME);
         }
 }
-//Drive forward by time, no shaft encoder usage.
+/*******************************************************
+ * Drive forward by time, with no shaft encoder usage. *
+ *******************************************************/
 void timedDrive(int percent, float time) {
     //Turn motors on at given percent
     right_motor.SetPercent(-percent);
@@ -191,7 +195,9 @@ void timedDrive(int percent, float time) {
     left_motor.Stop();
     right_motor.Stop();
 }
-//Check X Position by curving (untested)
+/******************************************
+ * Check X Position by curving (untested) *
+ ******************************************/
 void curveCheck(int x_coordinate, bool fire)
 {
     while(RPS.X() < x_coordinate - .5 || RPS.X() > x_coordinate + .5)
@@ -218,7 +224,9 @@ void curveCheck(int x_coordinate, bool fire)
     left_motor.Stop();
     checkHeading(180, fire);
 }
-//Turn to the right
+/*********************
+ * Turn to the right *
+ *********************/
 void turnRight(int percent, int degrees, int input_counts) //using encoders
 {
     //Make input degrees and convert degrees to counts
@@ -237,7 +245,9 @@ void turnRight(int percent, int degrees, int input_counts) //using encoders
     right_motor.Stop();
     left_motor.Stop();
 }
-//Turn to the left
+/********************
+ * Turn to the left *
+ ********************/
 void turnLeft(int percent, int degrees, int input_counts) //using encoders
 {
     //Make input degrees and convert degrees to counts
@@ -255,7 +265,9 @@ void turnLeft(int percent, int degrees, int input_counts) //using encoders
     right_motor.Stop();
     left_motor.Stop();
 }
-//Drive in the forward or backwards directions
+/************************************************
+ * Drive in the forward or backwards directions *
+ ************************************************/
 void driveForward(int percent, int inches, int input_counts) {
     int counts = inches*COUNTS_PER_INCH + input_counts;
     right_encoder.ResetCounts();
@@ -267,129 +279,113 @@ void driveForward(int percent, int inches, int input_counts) {
     } else if (percent < 0) {
         left_motor.SetPercent(percent - 2);
     }*/
-    while ((left_encoder.Counts() + right_encoder.Counts())/2.<counts);
+    float time = TimeNow();
+    while ((left_encoder.Counts() + right_encoder.Counts())/2.<counts && TimeNow() - time < 10);
+    if (TimeNow() - time > 10) {
+        right_motor.SetPercent(percent);
+        left_motor.SetPercent(-percent);
+    }
+    Sleep(.3);
     right_motor.Stop();
     left_motor.Stop();
 }
-//Check for x position for robot facing x +
+/*********************************************
+ * Check for x position for robot facing x + *
+ *********************************************/
 void checkXPlus(float x_coordinate, bool fire) {
-    //check whether the robot is within an acceptable range
-    while(!fire && (RPS.X() < x_coordinate - .5 || RPS.X() > x_coordinate + .5))
-    {
-        if(RPS.X() > x_coordinate)
-        {
-            //pulse the motors for a short duration in the correct direction
+    //Check if the position is already correct
+    while(!fire && (RPS.X() < x_coordinate - .5 || RPS.X() > x_coordinate + .5)) {
+        if(RPS.X() > x_coordinate) {
+            //If position is bigger than wanted, drive backwards
             driveForward(-SLOW_DRIVE, 0, 2);
-
-        }
-        else if(RPS.X() < x_coordinate)
-        {
-            //pulse the motors for a short duration in the correct direction
+        } else if(RPS.X() < x_coordinate) {
+            //If the position is smaller than wanted, drive forwards
             driveForward(SLOW_DRIVE, 0, 2);
         }
         Sleep(SHORT_SLEEP);
     }
 }
-//Check for x position for robot facing x -
+/*********************************************
+ * Check for x position for robot facing x - *
+ *********************************************/
 void checkXMinus(float x_coordinate, bool fire) {
-    //check whether the robot is within an acceptable range
-    while(!fire && (RPS.X() < x_coordinate - .5|| RPS.X() > x_coordinate + .5))
-    {
-        if(RPS.X() > x_coordinate)
-        {
-            //pulse the motors for a short duration in the correct direction
+    //Check if the position is already correct
+    while(!fire && (RPS.X() < x_coordinate - .5|| RPS.X() > x_coordinate + .5)) {
+        if(RPS.X() > x_coordinate) {
+            //If position is bigger than wanted, drive forward 
             driveForward(SLOW_DRIVE, 0, 2);
-
-        }
-        else if(RPS.X() < x_coordinate)
-        {
-            //pulse the motors for a short duration in the correct direction
+        } else if(RPS.X() < x_coordinate) {
+            //If the position is smaller than wanter, drive backwards
             driveForward(-SLOW_DRIVE, 0, 2);
         }
         Sleep(SHORT_SLEEP);
     }
 }
-//Check for x position for robot facing y -
+/*********************************************
+ * Check for x position for robot facing y - *
+ *********************************************/
 void checkYMinus(float y_coordinate, bool fire) {
-    //check whether the robot is within an acceptable range
-    while(!fire && (RPS.Y() < y_coordinate - .5 || RPS.Y() > y_coordinate + .5))
-    {
-        if(RPS.Y() > y_coordinate)
-        {
-            //pulse the motors for a short duration in the correct direction
-
+    //Check if the position is already correct
+    while(!fire && (RPS.Y() < y_coordinate - .5 || RPS.Y() > y_coordinate + .5)) {
+        if(RPS.Y() > y_coordinate) {
+            //If the position is bigger than wanted, drive forward
             driveForward(SLOW_DRIVE, 0, 2);
-        }
-        else if(RPS.Y() < y_coordinate)
-        {
-            //pulse the motors for a short duration in the correct direction
-
+        } else if(RPS.Y() < y_coordinate) {
+            //If the position is smaller than wanted, drive backwards
             driveForward(-SLOW_DRIVE, 0, 2);
         }
         Sleep(SHORT_SLEEP);
     }
 }
-//Check for x position for robot facing y +
+/*********************************************
+ * Check for x position for robot facing y + *
+ *********************************************/
 void checkYPlus(float y_coordinate, bool fire) {
-    //check whether the robot is within an acceptable range
-    while(!fire && (RPS.Y() < y_coordinate - .5 || RPS.Y() > y_coordinate + .5))
-    {
-        if(RPS.Y() > y_coordinate)
-        {
-            //pulse the motors for a short duration in the correct direction
-
+    //Check if the position is already correct
+    while(!fire && (RPS.Y() < y_coordinate - .5 || RPS.Y() > y_coordinate + .5)) {
+        if(RPS.Y() > y_coordinate) {
+            //If the position is bigger than wanted, drive backwards
             driveForward(-SLOW_DRIVE, 0, 2);
-        }
-        else if(RPS.Y() < y_coordinate)
-        {
-            //pulse the motors for a short duration in the correct direction
-
+        } else if(RPS.Y() < y_coordinate) {
+            //If the position is smaller than wanted, drive forwards
             driveForward(SLOW_DRIVE, 0, 2);
         }
         Sleep(SHORT_SLEEP);
     }
 }
-//Check for the heading of the robot
+/**************************************
+ * Check for the heading of the robot *
+ **************************************/
 void checkHeading(float heading, bool fire) {
     //Check if the heading being looked for is 0 degrees
     if (!fire && (-1 < heading && heading < 1)) {
         heading += 180;
-        while((RPS.Heading() + 180) < heading - .5 || (RPS.Heading() +  180) > heading + .5)
-        {
-            if((RPS.Heading() + 180) > heading)
-            {
-                //pulse the motors for a short duration in the correct direction
-
+        while((RPS.Heading() + 180) < heading - .5 || (RPS.Heading() +  180) > heading + .5) {
+            if((RPS.Heading() + 180) > heading) {
+                //If the heading is greater than wanted, turn right
                 turnRight(STD_DRIVE, 0, 1);
-            }
-            else if((RPS.Heading() + 180) < heading)
-            {
-                //pulse the motors for a short duration in the correct direction
-
+            } else if((RPS.Heading() + 180) < heading) {
+                //If the heading is smaller than wanted, turn left
                 turnLeft(STD_DRIVE, 0, 1);
             }
             Sleep(SHORT_SLEEP);
         }
     }
-    //Check if the heading is in acceptable range
-    while(!fire && (RPS.Heading() < heading - .5 || RPS.Heading() > heading + .5))
-    {
-        if(RPS.Heading() > heading)
-        {
-            //pulse the motors for a short duration in the correct direction
-
+    //Check if the heading is already correct
+    while(!fire && (RPS.Heading() < heading - .5 || RPS.Heading() > heading + .5)) {
+        if(RPS.Heading() > heading) {
+            //If the heading is greater than wanted, turn right
             turnRight(STD_DRIVE, 0, 1);
-        }
-        else if(RPS.Heading() < heading)
-        {
-            //pulse the motors for a short duration in the correct direction
-
+        } else if(RPS.Heading() < heading) {
+            //If the heading is smaller than wanted, turn left
             turnLeft(STD_DRIVE, 0, 1);
         }
         Sleep(SHORT_SLEEP);
     }
 }
-//Hit the buttons in order
+/**************************** 
+ * Hit the buttons in order *
+ ****************************/
 void buttonsOrder(bool fire)
 {
     int red = 1, blue = 2;
@@ -511,7 +507,9 @@ void buttonsOrder(bool fire)
     }
     LCD.WriteLine(RPS.ButtonsPressed());
 }
-//Turns the crank in the proper direction
+/*******************************************
+ * Turns the crank in the proper direction *
+ *******************************************/
 void crankDirection() {
     //Crank needs turned Right (CW)
     if (CdS.Value() < CDS_CRANK) {
@@ -551,7 +549,9 @@ void crankDirection() {
     }*/
     Sleep(SLEEP_TIME);
 }
-//Drive into the oil lever
+/****************************
+ * Drive into the oil lever *
+ ****************************/
 void oilRun() {
     while(RPS.OilPress() == 0) {
         if (RPS.OilDirec() == 1) {
@@ -574,7 +574,9 @@ void oilRun() {
         }
     }
 }
-//Get the salt bag
+/********************
+ * Get the salt bag *
+ ********************/
 void saltRun(bool RPSFire) {
     //Check Initial Heading
     checkHeading(180, RPSFire);
@@ -600,7 +602,9 @@ void saltRun(bool RPSFire) {
         Sleep(SLEEP_TIME);
     }
 }
-//Drive to the crank
+/**********************
+ * Drive to the crank *
+ **********************/
 void crankRun (bool RPSFire) {
     //Turn towards the ramp wall
     turnRight(STD_DRIVE, 80, 0);
@@ -626,10 +630,16 @@ void crankRun (bool RPSFire) {
     timedDrive(-STD_DRIVE, 1.5);
     Sleep(SLEEP_TIME);
 }
-//Drive into the garage
+/*************************
+ * Drive into the garage *
+ *************************/
 void garageRun(bool RPSFire) {
+    //Drive back a little and check heading
+    driveForward(STD_DRIVE, 1, 0);
+    checkHeading(180, RPSFire);
+    Sleep(SHORT_SLEEP);
     //Drive backwards from the crank
-    driveForward(STD_DRIVE, 7, 25);
+    driveForward(STD_DRIVE, 6, 25);
     checkYMinus(POINT_H, RPSFire);
     Sleep(SLEEP_TIME);
     //Turn towards the snow pile
@@ -652,7 +662,9 @@ void garageRun(bool RPSFire) {
     //checkXMinus(POINT_K, RPSFire);
     Sleep(SLEEP_TIME);
 }
-//Drive to the buttons
+/************************
+ * Drive to the buttons *
+ ************************/
 void buttonsRun(bool RPSFire) {
     //Drive back from the garage
     driveForward(-STD_DRIVE, 2, 0);
@@ -674,7 +686,9 @@ void buttonsRun(bool RPSFire) {
     checkXPlus(POINT_M, RPSFire);
     Sleep(SLEEP_TIME);
 }
-//Drive back to the bottom level
+/**********************************
+ * Drive back to the bottom level *
+ **********************************/
 void bottomRun(bool RPSFire) {
     //Back up
     driveForward(STD_DRIVE, 13, 0);
