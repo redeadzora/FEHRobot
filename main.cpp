@@ -269,6 +269,7 @@ void turnLeft(int percent, int degrees, int input_counts) //using encoders
  * Drive in the forward or backwards directions *
  ************************************************/
 void driveForward(int percent, int inches, int input_counts) {
+    //Calculate input counts
     int counts = inches*COUNTS_PER_INCH + input_counts;
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
@@ -569,7 +570,7 @@ void oilRun() {
             disk.SetDegree(0);
             Sleep(SLEEP_TIME*2);
             //Drive into the lever
-            timedDrive(-FAST_DRIVE, 2.0);
+            timedDrive(-FAST_DRIVE, .5);
             turnRight(FAST_DRIVE, 10, 0);
         }
     }
@@ -595,8 +596,9 @@ void saltRun(bool RPSFire) {
     checkHeading(222, RPSFire);
     for (int i = 0; i < 2; i++) {
         //Drive into the salt bag
-        timedDrive(SLOW_DRIVE, .5);
-        timedDrive(FAST_DRIVE, 2.3 );
+        timedDrive(SLOW_DRIVE, 1.0);
+        timedDrive(STD_DRIVE, 0.5);
+        timedDrive(FAST_DRIVE, 1.5 );
         Sleep(SLEEP_TIME);
         //Drive back from the salt bag
         driveForward(-STD_DRIVE, 5, 0);
@@ -707,7 +709,7 @@ void bottomRun(bool RPSFire) {
     checkHeading(180, RPSFire);
     Sleep(SLEEP_TIME);
     //Drive down the ramp
-    driveForward(STD_DRIVE, 33, 0);
+    driveForward(STD_DRIVE, 30, 0);
     checkYMinus(POINT_N, RPSFire);
     Sleep(SLEEP_TIME);
     //Turn towards negative-x wall
