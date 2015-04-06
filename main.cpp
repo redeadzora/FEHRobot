@@ -284,8 +284,8 @@ void driveForward(int percent, int inches, int input_counts) {
     if (TimeNow() - time > 10) {
         right_motor.SetPercent(percent);
         left_motor.SetPercent(-percent);
+        Sleep(.25);
     }
-    Sleep(.3);
     right_motor.Stop();
     left_motor.Stop();
 }
@@ -312,7 +312,7 @@ void checkXMinus(float x_coordinate, bool fire) {
     //Check if the position is already correct
     while(!fire && (RPS.X() < x_coordinate - .5|| RPS.X() > x_coordinate + .5)) {
         if(RPS.X() > x_coordinate) {
-            //If position is bigger than wanted, drive forward 
+            //If position is bigger than wanted, drive forward
             driveForward(SLOW_DRIVE, 0, 2);
         } else if(RPS.X() < x_coordinate) {
             //If the position is smaller than wanter, drive backwards
@@ -383,7 +383,7 @@ void checkHeading(float heading, bool fire) {
         Sleep(SHORT_SLEEP);
     }
 }
-/**************************** 
+/****************************
  * Hit the buttons in order *
  ****************************/
 void buttonsOrder(bool fire)
@@ -595,7 +595,8 @@ void saltRun(bool RPSFire) {
     checkHeading(222, RPSFire);
     for (int i = 0; i < 2; i++) {
         //Drive into the salt bag
-        timedDrive(FAST_DRIVE, 2.5);
+        timedDrive(SLOW_DRIVE, .5);
+        timedDrive(FAST_DRIVE, 2.3 );
         Sleep(SLEEP_TIME);
         //Drive back from the salt bag
         driveForward(-STD_DRIVE, 5, 0);
