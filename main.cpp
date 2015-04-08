@@ -74,6 +74,12 @@
 #define SERVO_MIN 510
 //Servo motor maximum
 #define SERVO_MAX 2260
+//Soft (temporary) min limit of servo distance
+#define SERVO_SMIN 20
+//Hard max limit of servo distance
+#define SERVO_HMAX 180
+//Hard min limit of servo distance
+#define SERVO_HMIN 0
 //Declare the various sensors and motors
 ButtonBoard buttons(FEHIO::Bank3); //Button Board
 FEHServo disk( FEHServo::Servo0); //Disk Mechanism
@@ -114,7 +120,7 @@ int main(void)
     //Set servo limits and initial position
     disk.SetMin(SERVO_MIN);
     disk.SetMax(SERVO_MAX);
-    disk.SetDegree(17);
+    disk.SetDegree(SERVO_SMIN);
     //Ask whether the RPS is working
     LCD.WriteLine("Is the RPS on fire? \n(L = Y, R = N)");
     while(!buttons.MiddlePressed()) {
@@ -132,12 +138,13 @@ int main(void)
     }
     Sleep(SLEEP_TIME);
     LCD.Clear( FEHLCD::Green );
+    float time = TimeNow() + 35;
     while(true) {
         LCD.WriteLine("Press the middle button to begin");
         while(!buttons.MiddlePressed());
         while(buttons.MiddlePressed());
         LCD.WriteLine("Will start on light now");
-        while(CdS.Value()>CDS_THRESHOLD) {
+        while(CdS.Value()>CDS_THRESHOLD && TimeNow() < time) {
             LCD.WriteRC(CdS.Value(), 5, 12);
             LCD.WriteRC(Battery.Voltage(), 7, 12);
             Sleep(1.0);
@@ -183,7 +190,7 @@ void readings() {
         }
 }
 /*******************************************************
- * Drive forward by time, with no shaft encoder usage. *
+ * Drive forward by time with no shaft encoder usage. *
  *******************************************************/
 void timedDrive(int percent, float time) {
     //Turn motors on at given percent
@@ -505,6 +512,7 @@ void buttonsOrder(bool fire)
                 Sleep(SLEEP_TIME);
             }
         }
+        Sleep(200);
     }
     LCD.WriteLine(RPS.ButtonsPressed());
 }
@@ -518,13 +526,13 @@ void crankDirection() {
         for (int i = 0; i < 4; i++) {
             right_motor.SetPercent(SLOW_DRIVE+7);
             left_motor.SetPercent(-SLOW_DRIVE-7);
-            disk.SetDegree(180);
-            Sleep(SLEEP_TIME);
+            disk.SetDegree(SERVO_HMAX);
+            Sleep(SLEEP_TIME + 300);
             right_motor.Stop();
             left_motor.Stop();
             driveForward(STD_DRIVE, 1, 0);
             Sleep(SLEEP_TIME);
-            disk.SetDegree(17);
+            disk.SetDegree(SERVO_SMIN);
             Sleep(SLEEP_TIME);
             timedDrive(-STD_DRIVE, .5);
             Sleep(SLEEP_TIME);
@@ -534,13 +542,13 @@ void crankDirection() {
         for (int i = 0; i < 4; i++) {
             right_motor.SetPercent(SLOW_DRIVE+7);
             left_motor.SetPercent(-SLOW_DRIVE-7);
-            disk.SetDegree(17);
-            Sleep(SLEEP_TIME);
+            disk.SetDegree(SERVO_SMIN);
+            Sleep(SLEEP_TIME + 300);
             right_motor.Stop();
             left_motor.Stop();
             driveForward(STD_DRIVE, 1, 0);
             Sleep(SLEEP_TIME);
-            disk.SetDegree(180);
+            disk.SetDegree(SERVO_HMAX);
             Sleep(SLEEP_TIME);
             timedDrive(-STD_DRIVE, .5);
             Sleep(SLEEP_TIME);
@@ -557,21 +565,21 @@ void oilRun() {
     while(RPS.OilPress() == 0) {
         if (RPS.OilDirec() == 1) {
             //Push the lever mechanism down
-            disk.SetDegree(0);
+            disk.SetDegree(SERVO_HMIN);
             Sleep(SLEEP_TIME*2);
             //Drive into the lever
             timedDrive(FAST_DRIVE, 2.0);
-            turnLeft(FAST_DRIVE, 10, 0);
+            turnLeft(FAST_DRIVE, 20, 0);
         } else if (RPS.OilDirec() == 0) {
             //Drive past the lever
             driveForward(STD_DRIVE, 10, 0);
             timedDrive(STD_DRIVE, .8);
             //Push the lever mechanism down
-            disk.SetDegree(0);
+            disk.SetDegree(SERVO_HMIN);
             Sleep(SLEEP_TIME*2);
             //Drive into the lever
             timedDrive(-FAST_DRIVE, .5);
-            turnRight(FAST_DRIVE, 10, 0);
+            turnRight(FAST_DRIVE, 20, 0);
         }
     }
 }
