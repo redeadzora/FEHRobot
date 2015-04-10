@@ -15,9 +15,9 @@
 #include <FEHServo.h>
 #include <FEHBattery.h>
 //The number of counts when an inch is travelled
-#define COUNTS_PER_INCH 40
+#define COUNTS_PER_INCH 39
 //The number of counts when 1 degree is turned
-#define COUNTS_PER_DEGREE 233/90
+#define COUNTS_PER_DEGREE 223/90
 //The point South of the starting zone
 #define POINT_A 20.0
 //The point at the bottom of the ramp
@@ -29,11 +29,11 @@
 //The necessary position for cranking
 #define POINT_E 30.7
 //The point by the ramp wall
-#define POINT_F 28.5
+#define POINT_F 27.7
 //The point at the top of the ramp
 #define POINT_G 43.4
 //The point in front of the top of the ramp
-#define POINT_H 48.7
+#define POINT_H 50.7
 //The point to which the snow is being plowed
 #define POINT_I 10.2
 //The point before the garage
@@ -47,11 +47,11 @@
 //The point at the bottom of the ramp (heading down)
 #define POINT_N 21.8
 //The point north of the pump
-#define POINT_O 17.1
+#define POINT_O 15.6
 //The standard driving percentage
-#define STD_DRIVE 35
+#define STD_DRIVE 37
 //The fast driving percentage
-#define FAST_DRIVE 50
+#define FAST_DRIVE 45
 //The slow driving percentage
 #define SLOW_DRIVE 12
 //The max driving speed. Only for use in extreme circumstances.
@@ -139,36 +139,41 @@ int main(void)
     Sleep(SLEEP_TIME);
     LCD.Clear( FEHLCD::Green );
     float time = TimeNow() + 35;
-    while(true) {
-        LCD.WriteLine("Press the middle button to begin");
-        while(!buttons.MiddlePressed());
-        while(buttons.MiddlePressed());
+    LCD.WriteLine("Press the middle button to begin");
+    while(!buttons.MiddlePressed());
+    while(buttons.MiddlePressed());
+    while(CdS.Value()>CDS_THRESHOLD && TimeNow() < time) {
+        LCD.Clear();
         LCD.WriteLine("Will start on light now");
-        while(CdS.Value()>CDS_THRESHOLD && TimeNow() < time) {
-            LCD.WriteRC(CdS.Value(), 5, 12);
-            LCD.WriteRC(Battery.Voltage(), 7, 12);
-            Sleep(1.0);
-        }
-        LCD.Clear( FEHLCD::Green );
-        //Start and get the salt bag
-        saltRun(RPSFire);
-        //Drive to the crank
-        crankRun(RPSFire);
-        //Turn the crank in the proper direction
-        crankDirection();
-        //Deposit the Salt Bag
-        garageRun(RPSFire);
-        //Drive to the buttons
-        buttonsRun(RPSFire);
-        //Press the buttons in order
-        buttonsOrder(RPSFire);
-        //Drive to the lever
-        bottomRun(RPSFire);
-        //Drive into the lever in the correct direction
-        oilRun();
-        //Get readings
-        readings();
-        }
+        LCD.Write("\n\n\nCdS:      ");
+        LCD.WriteLine(CdS.Value());
+        LCD.Write("\n\nBattery:  ");
+        LCD.WriteLine((Battery.Voltage()/11.5)*100);
+        LCD.Write("\n\nX (17.6): ");
+        LCD.WriteLine(RPS.X());
+        LCD.Write("\n\nHeading:  ");
+        LCD.WriteLine(RPS.Heading());
+        Sleep(1.0);
+    }
+    LCD.Clear( FEHLCD::Green );
+    //Start and get the salt bag
+    saltRun(RPSFire);
+    //Drive to the crank
+    crankRun(RPSFire);
+    //Turn the crank in the proper direction
+    crankDirection();
+    //Deposit the Salt Bag
+    garageRun(RPSFire);
+    //Drive to the buttons
+    buttonsRun(RPSFire);
+    //Press the buttons in order
+    buttonsOrder(RPSFire);
+    //Drive to the lever
+    bottomRun(RPSFire);
+    //Drive into the lever in the correct direction
+    oilRun();
+    //Get readings
+    readings();
 
 }
 /*************************************************
@@ -288,8 +293,8 @@ void driveForward(int percent, int inches, int input_counts) {
         left_motor.SetPercent(percent - 2);
     }*/
     float time = TimeNow();
-    while ((left_encoder.Counts() + right_encoder.Counts())/2.<counts && TimeNow() - time < 10);
-    if (TimeNow() - time > 10) {
+    while ((left_encoder.Counts() + right_encoder.Counts())/2.<counts && TimeNow() - time < 6);
+    if (TimeNow() - time > 5) {
         right_motor.SetPercent(percent);
         left_motor.SetPercent(-percent);
         Sleep(.25);
@@ -525,7 +530,7 @@ void crankDirection() {
         LCD.WriteLine("CW (RED)");
         for (int i = 0; i < 4; i++) {
             right_motor.SetPercent(SLOW_DRIVE+7);
-            left_motor.SetPercent(-SLOW_DRIVE-7);
+            left_motor.SetPercent(-SLOW_DRIVE-9);
             disk.SetDegree(SERVO_HMAX);
             Sleep(SLEEP_TIME + 300);
             right_motor.Stop();
@@ -541,7 +546,7 @@ void crankDirection() {
         LCD.WriteLine("CCW (BLUE)");
         for (int i = 0; i < 4; i++) {
             right_motor.SetPercent(SLOW_DRIVE+7);
-            left_motor.SetPercent(-SLOW_DRIVE-7);
+            left_motor.SetPercent(-SLOW_DRIVE-9);
             disk.SetDegree(SERVO_SMIN);
             Sleep(SLEEP_TIME + 300);
             right_motor.Stop();
@@ -595,7 +600,9 @@ void saltRun(bool RPSFire) {
     checkYMinus(POINT_A, RPSFire);
     Sleep(SLEEP_TIME);
     //Turn towards the salt bag
-    turnLeft(STD_DRIVE, 42, 0);
+    turnLeft(STD_DRIVE, 38, 0);
+    checkHeading(222, RPSFire);
+    Sleep(SHORT_SLEEP);
     checkHeading(222, RPSFire);
     Sleep(SLEEP_TIME);
     //Drive towards the salt bag
@@ -622,7 +629,7 @@ void crankRun (bool RPSFire) {
     checkHeading(140, RPSFire);
     Sleep(SLEEP_TIME);
     //Drive towards the ramp wall
-    driveForward(-STD_DRIVE, 9, 20);
+    driveForward(-STD_DRIVE, 8, 20);
     checkXMinus(POINT_F, RPSFire);
     Sleep(SLEEP_TIME);
     //Turn towards the ramp
@@ -630,7 +637,7 @@ void crankRun (bool RPSFire) {
     checkHeading(180, RPSFire);
     Sleep(SLEEP_TIME);
     //Drive up the ramp
-    driveForward(-FAST_DRIVE, 32, 0);
+    driveForward(-FAST_DRIVE, 34, 0);
     driveForward(-STD_DRIVE, 2, 0);
     driveForward(-SLOW_DRIVE, 1, 0);
     checkYMinus(POINT_C, RPSFire);
@@ -650,15 +657,15 @@ void garageRun(bool RPSFire) {
     checkHeading(180, RPSFire);
     Sleep(SHORT_SLEEP);
     //Drive backwards from the crank
-    driveForward(STD_DRIVE, 6, 25);
+    driveForward(STD_DRIVE, 4, 25);
     checkYMinus(POINT_H, RPSFire);
     Sleep(SLEEP_TIME);
     //Turn towards the snow pile
-    turnRight(STD_DRIVE, 100, 0);
-    checkHeading(80.7, RPSFire);
+    turnRight(STD_DRIVE, 95, 0);
+    checkHeading(85.7, RPSFire);
     Sleep(SLEEP_TIME);
     //Plow the snow forward
-    timedDrive(STD_DRIVE, 2.5);
+    timedDrive(STD_DRIVE - 12, 3.2);
     Sleep(SLEEP_TIME);
     //Pull back from snow
     driveForward(-STD_DRIVE, 2, 20);
@@ -685,15 +692,15 @@ void buttonsRun(bool RPSFire) {
     checkHeading(132, RPSFire);
     Sleep(SLEEP_TIME);
     //Drive forward
-    driveForward(-STD_DRIVE, 6, 10);
+    driveForward(-STD_DRIVE, 8, 10);
     checkYMinus(POINT_L, RPSFire);
     Sleep(SLEEP_TIME);
     //Turn towards the buttons
-    turnLeft(STD_DRIVE, 90, 0);
-    checkHeading(222, RPSFire);
+    turnLeft(STD_DRIVE, 92, 0);
+    checkHeading(224, RPSFire);
     Sleep(SLEEP_TIME);
     //Drive towards the buttons
-    driveForward(-STD_DRIVE, 2, 0);
+    driveForward(-STD_DRIVE, 3, 0);
     checkXPlus(POINT_M, RPSFire);
     Sleep(SLEEP_TIME);
 }
@@ -717,7 +724,9 @@ void bottomRun(bool RPSFire) {
     checkHeading(180, RPSFire);
     Sleep(SLEEP_TIME);
     //Drive down the ramp
-    driveForward(STD_DRIVE, 30, 0);
+    driveForward(STD_DRIVE, 27, 0);
+    checkHeading(180, RPSFire);
+    driveForward(STD_DRIVE, 3, 0);
     checkYMinus(POINT_N, RPSFire);
     Sleep(SLEEP_TIME);
     //Turn towards negative-x wall
@@ -725,7 +734,7 @@ void bottomRun(bool RPSFire) {
     checkHeading(90, RPSFire);
     Sleep(SLEEP_TIME);
     //Drive towards the negative-x wall
-    driveForward(STD_DRIVE, 11, 30);
+    driveForward(STD_DRIVE, 12, 20);
     checkXMinus(POINT_O, RPSFire);
     Sleep(SLEEP_TIME);
     //Turn towards the negative-y wall
