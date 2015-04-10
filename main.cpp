@@ -57,7 +57,7 @@
 //The max driving speed. Only for use in extreme circumstances.
 #define HYPER_DRIVE 100 //Think before you do this.
 //The standard sleep time
-#define SLEEP_TIME 500
+#define SLEEP_TIME 450
 //The short sleep time used in RPS checks
 #define SHORT_SLEEP 50
 //The CdS Threshold
@@ -65,7 +65,7 @@
 //The crank threshold
 #define CDS_CRANK .54
 //The angle to press the red button
-#define RED_ANGLE 39
+#define RED_ANGLE 44
 //The angle to press the blue button
 #define BLUE_ANGLE 164
 //The angle to press the white button
@@ -567,6 +567,11 @@ void crankDirection() {
  * Drive into the oil lever *
  ****************************/
 void oilRun() {
+    if (RPS.OilDirec() == 0) {
+                //Drive past the lever
+                driveForward(STD_DRIVE, 10, 0);
+                timedDrive(STD_DRIVE, .8);
+    }
     while(RPS.OilPress() == 0) {
         if (RPS.OilDirec() == 1) {
             //Push the lever mechanism down
@@ -577,7 +582,6 @@ void oilRun() {
             turnLeft(FAST_DRIVE, 20, 0);
         } else if (RPS.OilDirec() == 0) {
             //Drive past the lever
-            driveForward(STD_DRIVE, 10, 0);
             timedDrive(STD_DRIVE, .8);
             //Push the lever mechanism down
             disk.SetDegree(SERVO_HMIN);
@@ -724,7 +728,11 @@ void bottomRun(bool RPSFire) {
     checkHeading(180, RPSFire);
     Sleep(SLEEP_TIME);
     //Drive down the ramp
-    driveForward(STD_DRIVE, 27, 0);
+    driveForward(STD_DRIVE, 3, 0);
+    checkHeading(180, RPSFire);
+    Sleep(SHORT_SLEEP);
+    checkHeading(180, RPSFire);
+    driveForward(STD_DRIVE, 24, 0);
     checkHeading(180, RPSFire);
     driveForward(STD_DRIVE, 3, 0);
     checkYMinus(POINT_N, RPSFire);
