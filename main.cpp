@@ -63,7 +63,7 @@
 //The CdS Threshold
 #define CDS_THRESHOLD .55
 //The crank threshold
-#define CDS_CRANK .54
+#define CDS_CRANK .8
 //The angle to press the red button
 #define RED_ANGLE 44
 //The angle to press the blue button
@@ -132,16 +132,19 @@ int main(void)
             Sleep(SHORT_SLEEP);
             RPSFire = false;
             RPS.InitializeMenu();
-            LCD.WriteLine("Press middle now.");
+            LCD.WriteLine("Press middle now.");            
             Sleep(SLEEP_TIME);
         }
     }
     Sleep(SLEEP_TIME);
     LCD.Clear( FEHLCD::Green );
-    float time = TimeNow() + 35;
     LCD.WriteLine("Press the middle button to begin");
-    while(!buttons.MiddlePressed());
+    while(!buttons.MiddlePressed()){
+        LCD.WriteRC(RPS.X(), 6, 6);
+        Sleep(SLEEP_TIME);
+    }
     while(buttons.MiddlePressed());
+    float time = TimeNow() + 35;
     while(CdS.Value()>CDS_THRESHOLD && TimeNow() < time) {
         LCD.Clear();
         LCD.WriteLine("Will start on light now");
@@ -561,7 +564,7 @@ void crankDirection() {
     } /*else {
         LCD.WriteLine("The CdS cell cannot read the light color.");
     }*/
-    Sleep(SLEEP_TIME);
+    Sleep(SLEEP_TIME + 250);
 }
 /****************************
  * Drive into the oil lever *
